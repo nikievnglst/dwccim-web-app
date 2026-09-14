@@ -1746,6 +1746,48 @@ function getAudioCtx(){
   return toolsAudioCtx;
 }
 
+// iOS "Add to Home Screen" apps suspend/power down the Web Audio engine
+// between sounds much more aggressively than Safari tabs do. A single
+// immediate tone (like the tuner's string sound) survives that, but a
+// metronome's short, spaced-out clicks can get silently dropped. Unlocking
+// on the very first touch anywhere, and keeping a near-silent oscillator
+// running while the metronome plays, keeps the audio engine "warm" so the
+// real ticks aren't swallowed.
+let keepAliveNode = null;
+function startKeepAlive(){
+  if(keepAliveNode) return;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 20; // inaudible
+  gain.gain.value = 0.00001; // effectively silent, but keeps the engine active
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  keepAliveNode = { osc, gain };
+}
+function stopKeepAlive(){
+  if(!keepAliveNode) return;
+  try{ keepAliveNode.osc.stop(); }catch(e){}
+  keepAliveNode = null;
+}
+function unlockAudioOnce(){
+  const ctx = getAudioCtx();
+  if(ctx.state === 'suspended') ctx.resume();
+  // Play a truly silent, zero-length buffer synchronously within the
+  // gesture — the standard iOS unlock trick.
+  const buf = ctx.createBuffer(1, 1, 22050);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.start(0);
+  document.removeEventListener('touchend', unlockAudioOnce);
+  document.removeEventListener('mousedown', unlockAudioOnce);
+}
+document.addEventListener('touchend', unlockAudioOnce, { once: true });
+document.addEventListener('mousedown', unlockAudioOnce, { once: true });
+
 /* ---------- METRONOME ---------- */
 const bpmValueEl = document.getElementById('bpmValue');
 const bpmSlider = document.getElementById('bpmSlider');
@@ -1826,6 +1868,7 @@ function metroScheduleNote(beatNumber, time){
 
 function metroScheduler(){
   const ctx = getAudioCtx();
+  if(ctx.state === 'suspended') ctx.resume(); // defensive: iOS can re-suspend mid-run
   while(nextNoteTime < ctx.currentTime + scheduleAheadTime){
     metroScheduleNote(currentBeat, nextNoteTime);
     metroNextNote();
@@ -1860,6 +1903,7 @@ async function startMetronome(){
   currentBeat = 0;
   scheduledBeats = [];
   nextNoteTime = ctx.currentTime + 0.05;
+  startKeepAlive();
   metroScheduler();
   metroVisualLoop();
   metroToggleBtn.textContent = '■ Stop';
@@ -1871,6 +1915,7 @@ function stopMetronome(){
   clearTimeout(metroTimerID);
   cancelAnimationFrame(rafID);
   scheduledBeats = [];
+  stopKeepAlive();
   beatRowEl.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('on','downbeat'));
   metroToggleBtn.textContent = '▶ Start';
   metroToggleBtn.classList.remove('stop');
