@@ -1013,6 +1013,12 @@
   }
 </style>
 </head>
+<!-- Firebase (used only for the Setlist Builder's cross-device sync — see the
+     "FIREBASE SETUP" comment near the top of the <script> below). Safe to
+     leave in place even if you never set up Firebase; the app checks for a
+     real config before using it. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <body>
 <div class="wrap">
   <header>
@@ -1069,7 +1075,7 @@
         <button class="builder-clear-btn" id="builderClearBtn">Clear custom lineup</button>
         <button class="builder-save-btn" id="builderSaveBtn">Save Lineup</button>
       </div>
-      <p class="team-note">Saved lineups are stored on this device only (there's no shared server), so whoever builds it should share it in the group chat, or build it on the phone/computer the team screen uses.</p>
+      <p class="team-note" id="builderSyncNote"></p>
     </div>
   </section>
 
@@ -1194,6 +1200,32 @@
 </div>
 
 <script>
+/* ================== FIREBASE SETUP (optional, for cross-device Setlist sync) ==================
+   Fill these 4 values in with your own free Firebase project's config to make
+   the Setlist Builder sync live across every phone/device on the team.
+   Full step-by-step instructions are in FIREBASE_SETUP.md in this download.
+   Leave the placeholder values as-is and the app works exactly as before —
+   lineups just stay on whichever device built them. */
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_YOUR_API_KEY_HERE",
+  authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",
+  databaseURL: "PASTE_YOUR_DATABASE_URL_HERE",
+  projectId: "PASTE_YOUR_PROJECT_ID_HERE",
+};
+let fbDb = null;
+let fbEnabled = false;
+try{
+  if(FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('PASTE_') && typeof firebase !== 'undefined'){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbDb = firebase.database();
+    fbEnabled = true;
+  }
+}catch(e){
+  console.warn('Firebase not configured (or failed to load) — Setlist Builder will stay on-device only.', e);
+  fbDb = null;
+  fbEnabled = false;
+}
+
 /* ---------- SCHEDULE DATA ---------- */
 const schedule = {
   dates: ["Sept 6","Sept 13","Sept 20","Sept 27","Oct 4","Oct 11","Oct 18","Oct 25","Nov 1","Nov 8","Nov 15","Nov 22","Nov 29","Dec 6","Dec 13","Dec 20","Dec 27"],
@@ -1338,14 +1370,22 @@ const lineups = {
   ],
 };
 
-/* Custom (leader-built) lineups, saved on this device and preferred over
-   the hardcoded `lineups` object above when present for a date. */
+/* Custom (leader-built) lineups. Cached locally so the app renders instantly,
+   and pushed to Firebase (when configured) so every device stays in sync. */
 function loadCustomLineups(){
   try{ return JSON.parse(localStorage.getItem('dwccim-custom-lineups') || '{}'); }
   catch(e){ return {}; }
 }
-function saveCustomLineups(data){
+function saveCustomLineupsLocal(data){
   localStorage.setItem('dwccim-custom-lineups', JSON.stringify(data));
+}
+function saveCustomLineups(data){
+  saveCustomLineupsLocal(data);
+  if(fbEnabled){
+    fbDb.ref('customLineups').set(data).catch(err=>{
+      console.warn('Could not sync lineup to the team database — saved on this device only for now.', err);
+    });
+  }
 }
 
 function renderLineup(date){
@@ -1546,6 +1586,24 @@ builderClearBtn.addEventListener('click', ()=>{
   renderBuilderList();
   renderLineup(date);
 });
+
+/* Live sync: when Firebase is configured, listen for changes from any
+   device (including our own writes echoed back) and re-render. */
+const builderSyncNoteEl = document.getElementById('builderSyncNote');
+if(fbEnabled){
+  builderSyncNoteEl.textContent = '\u2601\uFE0F Connected — lineup changes sync to every device automatically.';
+  fbDb.ref('customLineups').on('value', (snap)=>{
+    const remote = snap.val() || {};
+    saveCustomLineupsLocal(remote);
+    renderLineup(sundaySelect.value);
+    if(builderCardEl.classList.contains('open')) openBuilderForDate(sundaySelect.value);
+  }, (err)=>{
+    console.warn('Lost connection to the team database:', err);
+    builderSyncNoteEl.textContent = '\u26A0\uFE0F Couldn\u2019t reach the team database — changes are saved on this device only for now.';
+  });
+} else {
+  builderSyncNoteEl.textContent = 'Saved lineups are stored on this device only (there\u2019s no shared server), so whoever builds it should share it in the group chat, or build it on the phone/computer the team screen uses.';
+}
 
 /* ---------- KEYS VIEW ---------- */
 let currentLang = 'English';
