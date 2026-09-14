@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>DWCCIM Worship Team</title>
+
+<!-- PWA / installable app support -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B2740">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DWCCIM Worship">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B2740;
+    --surface: #123852;
+    --surface-alt: #1A4863;
+    --hairline: #2F5975;
+    --text: #F4F7FA;
+    --text-dim: #9FB7C9;
+    --gold: #2B80B9;
+    --worship: #E8C547;
+    --praise: #8FCA9E;
+    --tithes: #E85567;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+  header{
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  header .logo{
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px var(--hairline);
+  }
+  header .heading-text{ min-width: 0; }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  .subtitle{
+    color: var(--text-dim);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* Tab switch */
+  .tabs{
+    display:flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 4px;
+    margin: 22px 0 24px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding: 10px 0;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .tab.active{
+    background: var(--gold);
+    color: #FFFFFF;
+  }
+
+  section.view{ display:none; }
+  section.view.active{ display:block; }
+
+  label.field-label{
+    display:block;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0 0 8px;
+  }
+
+  select{
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'><path d='M6 9l6 6 6-6' stroke='%239AA3C4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 14px center;
+    background-size: 18px;
+    color: var(--text);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 14px 40px 14px 16px;
+    font-size: 16px;
+    font-family: inherit;
+    margin-bottom: 18px;
+  }
+  select:focus{
+    outline: none;
+    border-color: var(--gold);
+  }
+  select:focus-visible{
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* category pills (Keys tab) */
+  .pillrow{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .pill{
+    display:flex;
+    align-items:center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .pill .dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+    flex-shrink:0;
+  }
+  .pill.active{
+    color: var(--text);
+    border-color: currentColor;
+    background: var(--surface-alt);
+  }
+  .pill:not(.active){ color: var(--text-dim); }
+  .pill[data-cat="worship"]{ color: var(--worship); }
+  .pill[data-cat="praise"]{ color: var(--praise); }
+  .pill[data-cat="tithes"]{ color: var(--tithes); }
+
+  .langrow{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .langbtn{
+    flex:1;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .langbtn.active{
+    background: var(--surface-alt);
+    color: var(--text);
+    border-color: var(--gold);
+  }
+
+  /* result card */
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .card .song-name{
+    font-family:'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 14px;
+  }
+  .leader-row{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 10px 0;
+    border-top: 1px solid var(--hairline);
+    font-size: 15px;
+  }
+  .leader-row:first-of-type{ border-top: none; }
+  .leader-row .name{ color: var(--text-dim); }
+  .leader-row .key{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--gold);
+  }
+  .empty-state{
+    color: var(--text-dim);
+    font-size: 14px;
+    text-align:center;
+    padding: 10px 0;
+  }
+
+  /* schedule tab */
+  .role-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    overflow:hidden;
+  }
+  .role-row{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 14px 18px;
+    border-top: 1px solid var(--hairline);
+  }
+  .role-row:first-child{ border-top: none; }
+  .role-row .role{
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .role-row .person{
+    font-size: 16px;
+    font-weight: 600;
+    text-align:right;
+  }
+  .note{
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .note .hi{ color: var(--gold); }
+
+  /* guidelines tab */
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 600;
+    margin: 28px 0 12px;
+  }
+  .section-title:first-of-type{ margin-top: 0; }
+  .agenda-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .agenda-row{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--hairline);
+  }
+  .agenda-row:first-child{ border-top: none; }
+  .agenda-time{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  .agenda-label{
+    font-size: 14px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+  .agenda-label em{
+    font-style: normal;
+    color: var(--text-dim);
+    font-size: 12px;
+    display:block;
+  }
+  .callout{
+    margin: 14px 0 0;
+    padding: 12px 16px;
+    background: var(--surface-alt);
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .body-text{
+    margin: 14px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .rules-list{
+    margin: 0;
+    padding-left: 22px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 18px 18px 18px 38px;
+  }
+  .rules-list li{
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    padding: 8px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .rules-list li:first-child{ border-top: none; padding-top: 0; }
+  .rules-list li:last-child{ padding-bottom: 0; }
+
+  /* song lineup */
+  .lineup-card{
+    margin-top: 18px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .lineup-title{
+    font-family:'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 18px 0;
+    margin: 0;
+  }
+  .lineup-row{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--hairline);
+  }
+  .lineup-row:nth-of-type(1){ border-top: none; margin-top: 10px; }
+  .lineup-info{ min-width: 0; }
+  .lineup-cat{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    font-weight: 700;
+    display:block;
+    margin-bottom: 2px;
+  }
+  .lineup-song{
+    font-size: 14.5px;
+    color: var(--text);
+    display:block;
+  }
+  .lineup-link{
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-alt);
+    border: 1px solid var(--hairline);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+  }
+  .lineup-link svg{ width: 16px; height: 16px; }
+  .lineup-empty{
+    padding: 14px 18px 18px;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo.png" alt="DWCCIM logo" class="logo">
+    <div class="heading-text">
+      <h1>DWCCIM Worship Team</h1>
+      <p class="subtitle">Schedule and song keys, in one place</p>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-view="schedule">Schedule</button>
+    <button class="tab" data-view="keys">Keys</button>
+    <button class="tab" data-view="guidelines">Guidelines</button>
+  </div>
+
+  <section class="view active" id="view-schedule">
+    <label class="field-label" for="sundaySelect">Sunday</label>
+    <select id="sundaySelect"></select>
+    <div class="role-card" id="roleCard"></div>
+    <p class="note" id="scheduleNote"></p>
+    <div id="lineupSection"></div>
+  </section>
+
+  <section class="view" id="view-keys">
+    <div class="langrow">
+      <button class="langbtn active" data-lang="English">English</button>
+      <button class="langbtn" data-lang="Tagalog">Tagalog</button>
+    </div>
+    <div class="pillrow" id="catPills"></div>
+    <label class="field-label" for="songSelect">Song</label>
+    <select id="songSelect"></select>
+    <div class="card" id="resultCard">
+      <p class="empty-state">Pick a song to see who leads it and in what key.</p>
+    </div>
+  </section>
+
+  <section class="view" id="view-guidelines">
+    <h2 class="section-title">Saturday Agenda</h2>
+    <div class="agenda-card">
+      <div class="agenda-row">
+        <span class="agenda-time">9:00 – 9:30 AM</span>
+        <span class="agenda-label">Call Time</span>
+      </div>
+      <div class="agenda-row">
+        <span class="agenda-time">9:30 – 10:00 AM</span>
+        <span class="agenda-label">Devotion <em>(15-min grace period)</em></span>
+      </div>
+      <div class="agenda-row">
+        <span class="agenda-time">10:00 AM – 12:00 PM</span>
+        <span class="agenda-label">Practice</span>
+      </div>
+    </div>
+    <p class="callout">No devotion, no practice. Attendance at devotion is required in order to join practice.</p>
+    <p class="body-text">Members who arrive late to practice are welcome to observe and receive guidance from the team, but may not play during the session — this helps avoid disrupting the group's focus. Please handle this with maturity; if this policy is a source of frustration, it's best to step away for the day rather than create tension within the team.</p>
+
+    <h2 class="section-title">Team Rules</h2>
+    <ol class="rules-list">
+      <li>Attendance at the Saturday practice immediately before your scheduled Sunday is required.</li>
+      <li>All members must attend Saturday practice, even if not scheduled to sing, dance, or play an instrument that week.</li>
+      <li>Exceptions are made only for important prior commitments or genuine emergencies.</li>
+      <li>If you are unable to attend the next Saturday practice, notify the team as soon as possible through the group chat — at least 1–2 weeks in advance when known ahead of time, or a minimum of 2 hours before practice in urgent situations.</li>
+      <li>If an emergency prevents you from attending Sunday service after having attended Saturday's practice, no replacement will take over the parts that were rehearsed — the team will proceed as prepared.</li>
+      <li>All members are expected to attentively listen to the sermon during service (except teachers and assistant teachers serving in Children's Ministry).</li>
+      <li>Members must dress modestly and appropriately at all times.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+/* ---------- SCHEDULE DATA ---------- */
+const schedule = {
+  dates: ["Sept 6","Sept 13","Sept 20","Sept 27","Oct 4","Oct 11","Oct 18","Oct 25","Nov 1","Nov 8","Nov 15","Nov 22","Nov 29","Dec 6","Dec 13","Dec 20","Dec 27"],
+  months: [
+    {label:"September", dates:["Sept 6","Sept 13","Sept 20","Sept 27"]},
+    {label:"October", dates:["Oct 4","Oct 11","Oct 18","Oct 25"]},
+    {label:"November", dates:["Nov 1","Nov 8","Nov 15","Nov 22","Nov 29"]},
+    {label:"December", dates:["Dec 6","Dec 13","Dec 20","Dec 27"]},
+  ],
+  roles: {
+    "Worship Leader": {"Sept 6":"Sis Lorraine","Sept 13":"Sis Jove","Sept 20":"Sis Ming","Sept 27":"Sis Lorraine","Oct 4":"Sis Jove","Oct 11":"Sis Ming","Oct 18":"Sis Lorraine","Oct 25":"Sis Jove","Nov 1":"Sis Ming","Nov 8":"Sis Lorraine","Nov 15":"Sis Jove","Nov 22":"Sis Ming","Nov 29":"Sis Lorraine","Dec 6":"Sis Jove","Dec 13":"Sis Ming","Dec 20":"Sis Lorraine","Dec 27":"Sis Jove"},
+    "Drums": {"Sept 6":"Echo","Sept 13":"Echo","Sept 20":"Echo","Sept 27":"Echo","Oct 4":"Echo","Oct 11":"Echo","Oct 18":"Echo","Oct 25":"Echo","Nov 1":"Echo","Nov 8":"Echo","Nov 15":"Echo","Nov 22":"Echo","Nov 29":"Echo","Dec 6":"Echo","Dec 13":"Echo","Dec 20":"Echo","Dec 27":"Echo"},
+    "Bass Guitar": {"Sept 6":"Belle","Sept 13":"Lorraine","Sept 20":"Lorraine","Sept 27":"Belle","Oct 4":"Lorraine","Oct 11":"Lorraine","Oct 18":"Belle","Oct 25":"Belle","Nov 1":"Belle","Nov 8":"Belle","Nov 15":"Lorraine","Nov 22":"Belle","Nov 29":"Belle","Dec 6":"Belle","Dec 13":"Lorraine","Dec 20":"Belle","Dec 27":"Belle"},
+    "Acoustic Guitar": {"Sept 6":"Ry","Sept 13":"Ry","Sept 20":"Belle","Sept 27":"Ry","Oct 4":"Ry","Oct 11":"Ry","Oct 18":"Ry","Oct 25":"Ry","Nov 1":"Ry","Nov 8":"Ry","Nov 15":"Belle","Nov 22":"Ry","Nov 29":"Ry","Dec 6":"Ry","Dec 13":"Ry","Dec 20":"Ry","Dec 27":"Ry"},
+    "Electric Guitar": {"Sept 6":"Whendell","Sept 13":"Kuya Bert","Sept 20":"Whendell","Sept 27":"Kuya Bert","Oct 4":"Whendell","Oct 11":"Kuya Bert","Oct 18":"Whendell","Oct 25":"Kuya Bert","Nov 1":"Whendell","Nov 8":"Kuya Bert","Nov 15":"Whendell","Nov 22":"Kuya Bert","Nov 29":"Whendell","Dec 6":"Whendell","Dec 13":"Kuya Bert","Dec 20":"Whendell","Dec 27":"Kuya Bert"},
+    "Piano": {"Sept 6":"Nikie/Adena","Sept 13":"Nikie/Adena","Sept 20":"Nikie/Adena","Sept 27":"Nikie/Adena","Oct 4":"Nikie/Adena","Oct 11":"Nikie/Adena","Oct 18":"Nikie/Adena","Oct 25":"Nikie/Adena","Nov 1":"Nikie/Adena","Nov 8":"Nikie/Adena","Nov 15":"Nikie/Adena","Nov 22":"Nikie/Adena","Nov 29":"Nikie/Adena","Dec 6":"Nikie/Adena","Dec 13":"Nikie/Adena","Dec 20":"Nikie/Adena","Dec 27":"Nikie/Adena"},
+    "Dancers": {"Sept 6":"Khylie & Eve","Sept 13":"Princess & Gly","Sept 20":"Khylie & Princess","Sept 27":"Gianne & Mikmik","Oct 4":"Belle & Aleeyah","Oct 11":"Khylie & Eve","Oct 18":"Princess & Gly","Oct 25":"Khylie & Princess","Nov 1":"Gianne & Mikmik","Nov 8":"Gianne & Mikmik","Nov 15":"Khylie & Eve","Nov 22":"Princess & Gly","Nov 29":"Khylie & Princess","Dec 6":"Gianne & Mikmik","Dec 13":"Belle & Aleeyah","Dec 20":"Khylie & Eve","Dec 27":"Princess & Gly"},
+  },
+  fifthSunday: "Nov 29"
+};
+
+/* ---------- KEYS DATA ---------- */
+// keys objects use short leader codes: Ming, Jove, Lorraine
+const keysData = {
+  English: {
+    worship: [
+      ["A Thousand Hallelujah", {Jove:"D"}],
+      ["Amazing Love", {Jove:"C"}],
+      ["At the Cross", {Jove:"C"}],
+      ["Battle Belongs", {Ming:"D"}],
+      ["Been so good", {Jove:"F"}],
+      ["Christ is Enough", {Jove:"Bm"}],
+      ["Do it again", {Ming:"D"}],
+      ["Give thanks", {Jove:"G"}],
+      ["Goodness of God", {Lorraine:"G"}],
+      ["Heart of a Servant", {Jove:"D"}],
+      ["Heart of Worship", {Jove:"C", Lorraine:"D"}],
+      ["Holy Forever", {Jove:"F"}],
+      ["Holy Spirit", {Lorraine:"D"}],
+      ["Hosanna", {Lorraine:"E"}],
+      ["King of kings", {Lorraine:"C#"}],
+      ["Living Hope", {Ming:"A", Jove:"A"}],
+      ["Lord I give You my heart", {Jove:"D"}],
+      ["Manifest", {Jove:"C"}],
+      ["Mighty to Save", {Jove:"A"}],
+      ["O Praise the Name", {Jove:"D"}],
+      ["Oceans", {Jove:"D"}],
+      ["Overflow of Worship", {Jove:"G"}],
+      ["Power of your Love", {Jove:"D"}],
+      ["Promises", {Ming:"C"}],
+      ["Pure as Gold", {Ming:"F", Jove:"F", Lorraine:"F"}],
+      ["Refiner's Fire", {Jove:"D"}],
+      ["Remembrance", {Jove:"E", Lorraine:"B"}],
+      ["Same God", {Ming:"F", Jove:"F", Lorraine:"C"}],
+      ["See a Victory", {Lorraine:"D"}],
+      ["The anthem", {Jove:"A"}],
+      ["The praise is Yours", {Jove:"D"}],
+      ["Victor's crown", {Jove:"D", Lorraine:"E"}],
+      ["Waymaker", {Lorraine:"C#"}],
+      ["What a beautiful name", {Ming:"D", Jove:"D"}],
+      ["When I speak Your Name", {Ming:"F"}],
+      ["With All I am", {Jove:"D"}],
+      ["Worthy", {Lorraine:"D"}],
+      ["Worthy is the Lamb", {Ming:"G", Jove:"E"}],
+      ["Yahweh will manifest Himself", {Jove:"C"}],
+      ["You are High and lifted up", {Ming:"F"}],
+    ],
+    praise: [
+      ["Celebrate", {Jove:"C"}],
+      ["Forever", {Ming:"E", Jove:"D", Lorraine:"E"}],
+      ["I've got Joy", {Jove:"A"}],
+      ["Joy - Planetshakers", {Ming:"E", Lorraine:"D"}],
+      ["Let everything that has breath", {Ming:"D"}],
+      ["Lord You are Good", {Jove:"D"}],
+      ["My redeemer Lives", {Jove:"E"}],
+      ["Nothing is impossible", {Lorraine:"C"}],
+      ["Praise", {Lorraine:"A"}],
+      ["Risen", {Jove:"E", Lorraine:"A"}],
+      ["Shout to the King", {Jove:"E"}],
+      ["The Spirit of the Lord", {Ming:"D", Jove:"C"}],
+      ["This is our time", {Jove:"Cm"}],
+      ["This is the day - Lakewood", {Ming:"F", Jove:"E", Lorraine:"F"}],
+      ["This is the Day - Planetshakers", {Ming:"F"}],
+      ["Your Grace Is Enough", {Ming:"E"}],
+      ["Yours is the Kingdom", {Jove:"Em"}],
+    ],
+    tithes: [
+      ["Give", {Ming:"E", Jove:"E", Lorraine:"E"}],
+      ["We bring the sacrifice", {Ming:"C"}],
+    ],
+  },
+  Tagalog: {
+    worship: [
+      ["Ang Pagibig Mo", {Lorraine:"D"}],
+      ["Ang Pangalan Mo", {Ming:"D"}],
+      ["Awit ng Pagsamba", {Jove:"F"}],
+      ["Banal Mong Tahanan", {Jove:"C"}],
+      ["Dakila Ka", {Ming:"D", Lorraine:"D"}],
+      ["Dakila Ka - Hope Filipino", {Jove:"D"}],
+      ["Dakila Ka - How great in Tagalog", {Jove:"D"}],
+      ["Diyos Inibig Mo", {Ming:"F"}],
+      ["Diyos Ka sa amin", {Lorraine:"D"}],
+      ["Ikaw ang Maghari", {Jove:"C"}],
+      ["Karapat-dapat", {Ming:"B"}],
+      ["Nararapat", {Lorraine:"D"}],
+      ["Pintig ng Puso", {Ming:"D"}],
+      ["Salamat Panginoon", {Jove:"C"}],
+    ],
+    praise: [
+      ["Ang lahat ay Magsasaya", {Jove:"D"}],
+      ["Hesus Dakila Ka", {Ming:"G"}],
+      ["Hesus sa buhay ko'y Ikaw", {Lorraine:"G"}],
+      ["Isisigaw Hallelujah", {Lorraine:"G"}],
+      ["Kahanga-hanga", {Jove:"D"}],
+      ["Malayang Malaya", {Jove:"C"}],
+      ["Napakabuti Mo", {Ming:"E"}],
+      ["O Hesus Dakila Ka", {Ming:"B"}],
+      ["Papuri Kay Yahweh", {Jove:"E", Lorraine:"E"}],
+      ["Sa biyaya", {Lorraine:"C"}],
+      ["Salamat Salamat", {Jove:"D", Lorraine:"D"}],
+      ["Tagapagligtas", {Jove:"D"}],
+      ["Tagumpay", {Ming:"F", Jove:"F", Lorraine:"F"}],
+      ["Tayo na Sama-Sama", {Lorraine:"D"}],
+    ],
+    tithes: [
+      ["Magbigay", {Ming:"E", Jove:"E", Lorraine:"E"}],
+      ["Uulan ng pagpapala", {Lorraine:"C"}],
+    ],
+  },
+};
+
+/* ---------- SONG LINEUP DATA ---------- */
+const lineups = {
+  "Sept 13": [
+    { category: "Call to Worship", title: "Manifest Himself", link: "https://www.youtube.com/watch?v=rvKTXPQuPvs&list=RDrvKTXPQuPvs&start_radio=1" },
+    { category: "Fast Song", title: "I've got Joy (River)", link: "https://youtube.com/playlist?list=RDF6Z-N1ySCj0&playnext=1&si=And0awHza9h13q2b" },
+    { category: "Fast Song", title: "This is our time", link: "https://www.youtube.com/watch?v=BclumJzTkQU&list=RDBclumJzTkQU&start_radio=1" },
+    { category: "Slow Song", title: "A Thousand Hallelujah", link: "https://www.youtube.com/watch?v=DeS49pSXDts&list=RDDeS49pSXDts&start_radio=1" },
+    { category: "Slow Song", title: "Praise the Name of the Lord our God", link: "https://www.youtube.com/watch?v=LqBpifDpNKc&list=RDLqBpifDpNKc&start_radio=1" },
+    { category: "Offertory", title: "We bring", link: null },
+    { category: "Victory Song", title: "Praise the Name of the Lord our God", link: null },
+  ],
+};
+
+function renderLineup(date){
+  const el = document.getElementById('lineupSection');
+  const items = lineups[date];
+  if(!items){
+    el.innerHTML = '';
+    return;
+  }
+  const ytIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M21.6 7.2s-.2-1.5-.8-2.2c-.8-.9-1.7-.9-2.1-1C15.9 3.8 12 3.8 12 3.8h0s-3.9 0-6.7.2c-.4 0-1.3.1-2.1 1-.6.7-.8 2.2-.8 2.2S2.2 9 2.2 10.7v1.5C2.2 14 2.4 15.7 2.4 15.7s.2 1.5.8 2.2c.8.9 1.9.9 2.4 1 1.7.2 7.4.2 7.4.2s3.9 0 6.7-.2c.4 0 1.3-.1 2.1-1 .6-.7.8-2.2.8-2.2s.2-1.7.2-3.5v-1.5c0-1.7-.2-3.5-.2-3.5Z" fill="%23FF0000"/><path d="M9.9 14.6V8.9l5.4 2.9-5.4 2.8Z" fill="white"/></svg>';
+  const rows = items.map(item => `
+    <div class="lineup-row">
+      <div class="lineup-info">
+        <span class="lineup-cat">${item.category}</span>
+        <span class="lineup-song">${item.title}</span>
+      </div>
+      ${item.link ? `<a class="lineup-link" href="${item.link}" target="_blank" rel="noopener">${ytIcon}</a>` : ''}
+    </div>
+  `).join('');
+  el.innerHTML = `<div class="lineup-card"><p class="lineup-title">Song Lineup</p>${rows}</div>`;
+}
+
+const catLabels = {
+  worship: {English:"Worship Songs", Tagalog:"Worship Song"},
+  praise: {English:"Praise Songs", Tagalog:"Praise Song"},
+  tithes: {English:"Tithes and Offering", Tagalog:"Tithes and Offering"},
+};
+
+/* ---------- TAB SWITCHING ---------- */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+/* ---------- SCHEDULE VIEW ---------- */
+const sundaySelect = document.getElementById('sundaySelect');
+schedule.months.forEach(m=>{
+  const og = document.createElement('optgroup');
+  og.label = m.label;
+  m.dates.forEach(d=>{
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d + (d === schedule.fifthSunday ? " (5th Sunday)" : "");
+    og.appendChild(opt);
+  });
+  sundaySelect.appendChild(og);
+});
+
+function renderSchedule(date){
+  const card = document.getElementById('roleCard');
+  card.innerHTML = '';
+  Object.keys(schedule.roles).forEach(role=>{
+    const row = document.createElement('div');
+    row.className = 'role-row';
+    row.innerHTML = `<span class="role">${role}</span><span class="person">${schedule.roles[role][date] || '—'}</span>`;
+    card.appendChild(row);
+  });
+  const note = document.getElementById('scheduleNote');
+  if(date === schedule.fifthSunday){
+    note.innerHTML = '<span class="hi">Nov 29</span> is a 5th Sunday \u2014 the worship leader rotation just continues straight through (Lorraine \u2192 Jove \u2192 Ming), it doesn\u2019t reset.';
+  } else {
+    note.textContent = '';
+  }
+  renderLineup(date);
+}
+
+// default to nearest upcoming Sunday in the list; fallback to first
+function pickDefaultDate(){
+  const dateMap = {
+    "Sept 6":"2026-09-06","Sept 13":"2026-09-13","Sept 20":"2026-09-20","Sept 27":"2026-09-27",
+    "Oct 4":"2026-10-04","Oct 11":"2026-10-11","Oct 18":"2026-10-18","Oct 25":"2026-10-25",
+    "Nov 1":"2026-11-01","Nov 8":"2026-11-08","Nov 15":"2026-11-15","Nov 22":"2026-11-22","Nov 29":"2026-11-29",
+    "Dec 6":"2026-12-06","Dec 13":"2026-12-13","Dec 20":"2026-12-20","Dec 27":"2026-12-27"
+  };
+  const today = new Date();
+  for(const d of schedule.dates){
+    if(new Date(dateMap[d] + "T23:59:59") >= today) return d;
+  }
+  return schedule.dates[schedule.dates.length-1];
+}
+
+const defaultDate = pickDefaultDate();
+sundaySelect.value = defaultDate;
+renderSchedule(defaultDate);
+sundaySelect.addEventListener('change', ()=> renderSchedule(sundaySelect.value));
+
+/* ---------- KEYS VIEW ---------- */
+let currentLang = 'English';
+let currentCat = 'worship';
+
+const catPillsEl = document.getElementById('catPills');
+function renderPills(){
+  catPillsEl.innerHTML = '';
+  ['worship','praise','tithes'].forEach(cat=>{
+    const b = document.createElement('button');
+    b.className = 'pill' + (cat === currentCat ? ' active' : '');
+    b.dataset.cat = cat;
+    b.innerHTML = `<span class="dot"></span>${catLabels[cat][currentLang]}`;
+    b.addEventListener('click', ()=>{
+      currentCat = cat;
+      renderPills();
+      renderSongOptions();
+    });
+    catPillsEl.appendChild(b);
+  });
+}
+
+const songSelect = document.getElementById('songSelect');
+function renderSongOptions(){
+  songSelect.innerHTML = '<option value="">Select a song…</option>';
+  const list = keysData[currentLang][currentCat];
+  list.forEach(([name])=>{
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    songSelect.appendChild(opt);
+  });
+  renderResult('');
+}
+
+function renderResult(songName){
+  const card = document.getElementById('resultCard');
+  if(!songName){
+    card.innerHTML = '<p class="empty-state">Pick a song to see who leads it and in what key.</p>';
+    return;
+  }
+  const list = keysData[currentLang][currentCat];
+  const entry = list.find(([name])=> name === songName);
+  if(!entry){
+    card.innerHTML = '<p class="empty-state">Song not found.</p>';
+    return;
+  }
+  const [, leaders] = entry;
+  const names = Object.keys(leaders);
+  if(names.length === 0){
+    card.innerHTML = `<p class="song-name">${songName}</p><p class="empty-state">No key recorded.</p>`;
+    return;
+  }
+  let rows = names.map(n=>`<div class="leader-row"><span class="name">${n}</span><span class="key">${leaders[n]}</span></div>`).join('');
+  card.innerHTML = `<p class="song-name">${songName}</p>${rows}`;
+}
+
+document.querySelectorAll('.langbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.langbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = btn.dataset.lang;
+    renderPills();
+    renderSongOptions();
+  });
+});
+
+songSelect.addEventListener('change', ()=> renderResult(songSelect.value));
+
+renderPills();
+renderSongOptions();
+
+/* ---------- PWA install support ---------- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
