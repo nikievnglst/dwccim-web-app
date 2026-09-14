@@ -1812,14 +1812,15 @@ function metroScheduleNote(beatNumber, time){
   const ctx = getAudioCtx();
   const osc = ctx.createOscillator();
   const envelope = ctx.createGain();
-  osc.frequency.value = (beatNumber === 0) ? 1400 : 900;
+  osc.type = 'square'; // punchier / more audible on small speakers than a pure sine tick
+  osc.frequency.value = (beatNumber === 0) ? 1500 : 1000;
   envelope.gain.setValueAtTime(0.0001, time);
   envelope.gain.exponentialRampToValueAtTime(1, time + 0.001);
-  envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+  envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.09);
   osc.connect(envelope);
   envelope.connect(ctx.destination);
   osc.start(time);
-  osc.stop(time + 0.06);
+  osc.stop(time + 0.09);
   scheduledBeats.push({ beat: beatNumber, time });
 }
 
@@ -1850,8 +1851,11 @@ function metroVisualLoop(){
   rafID = requestAnimationFrame(metroVisualLoop);
 }
 
-function startMetronome(){
+async function startMetronome(){
   const ctx = getAudioCtx();
+  if(ctx.state === 'suspended'){
+    try{ await ctx.resume(); }catch(e){ /* fall through — we still try to schedule */ }
+  }
   metroRunning = true;
   currentBeat = 0;
   scheduledBeats = [];
