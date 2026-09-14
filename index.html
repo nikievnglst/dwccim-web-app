@@ -29,6 +29,19 @@
     --praise: #8FCA9E;
     --tithes: #E85567;
   }
+  :root[data-theme="light"]{
+    --bg: #F3F6F9;
+    --surface: #FFFFFF;
+    --surface-alt: #E9EFF4;
+    --hairline: #D3DEE6;
+    --text: #142433;
+    --text-dim: #5A7286;
+    --gold: #1E6FA8;
+    --worship: #A9820F;
+    --praise: #2F8F4E;
+    --tithes: #C23349;
+  }
+  body{ transition: background-color .2s, color .2s; }
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
@@ -83,11 +96,15 @@
   }
   .tab{
     flex:1;
+    min-width: 0;
     text-align:center;
-    padding: 10px 0;
+    padding: 9px 1px;
     border-radius: 9px;
-    font-size: 15px;
+    font-size: 11.5px;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: var(--text-dim);
     background: transparent;
     border: none;
@@ -391,6 +408,609 @@
     color: var(--text-dim);
     font-size: 13px;
   }
+
+  /* ---------- Tools tab: metronome + tuner ---------- */
+  .toolbox-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .toolbox-card + .toolbox-card{ margin-top: 20px; }
+
+  /* metronome */
+  .bpm-display{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .bpm-value{
+    font-family:'Fraunces', serif;
+    font-weight: 700;
+    font-size: 44px;
+    color: var(--text);
+    min-width: 90px;
+    text-align:center;
+  }
+  .bpm-unit{
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .bpm-stepper{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 18px;
+    margin-bottom: 14px;
+  }
+  .bpm-btn{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: inherit;
+  }
+  .bpm-btn:active{ background: var(--gold); }
+  .bpm-slider{
+    width: 100%;
+    accent-color: var(--gold);
+    margin-bottom: 18px;
+  }
+  .beatrow{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .beat-dot{
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--surface-alt);
+    border: 1px solid var(--hairline);
+    transition: background .05s, transform .05s;
+  }
+  .beat-dot.on{
+    background: var(--worship);
+    border-color: var(--worship);
+    transform: scale(1.2);
+  }
+  .beat-dot.on.downbeat{
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .transport-row{
+    display:flex;
+    gap: 10px;
+  }
+  .transport-btn{
+    flex:1;
+    padding: 13px 0;
+    border-radius: 12px;
+    border: none;
+    background: var(--gold);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .transport-btn.stop{ background: var(--tithes); }
+  .taptempo-btn{
+    flex:1;
+    padding: 13px 0;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* tuner */
+  .tuner-note-display{
+    text-align:center;
+    margin-bottom: 4px;
+  }
+  .tuner-note{
+    font-family:'Fraunces', serif;
+    font-weight: 700;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .tuner-octave{
+    font-size: 18px;
+    color: var(--text-dim);
+    vertical-align: super;
+  }
+  .tuner-freq{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .tuner-meter{
+    position: relative;
+    height: 10px;
+    border-radius: 6px;
+    background: var(--surface-alt);
+    margin: 0 6px 10px;
+    overflow: visible;
+  }
+  .tuner-meter::before{
+    content:'';
+    position:absolute;
+    left: 50%;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    background: var(--hairline);
+    transform: translateX(-50%);
+  }
+  .tuner-needle{
+    position:absolute;
+    top: -5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    left: 50%;
+    transform: translateX(-50%);
+    transition: left .08s linear, background .15s;
+  }
+  .tuner-needle.in-tune{ background: var(--praise); }
+  .tuner-needle.close{ background: var(--worship); }
+  .tuner-needle.off{ background: var(--tithes); }
+  .tuner-status{
+    text-align:center;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    height: 18px;
+  }
+  .tuner-status.in-tune{ color: var(--praise); }
+  .tuner-status.close{ color: var(--worship); }
+  .tuner-status.off{ color: var(--tithes); }
+  .string-row{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .string-btn{
+    flex: 1;
+    min-width: 42px;
+    padding: 10px 0;
+    text-align:center;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .string-btn.match{
+    border-color: var(--praise);
+    color: var(--praise);
+  }
+  .mic-btn{
+    width: 100%;
+    padding: 13px 0;
+    border-radius: 12px;
+    border: none;
+    background: var(--gold);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mic-btn.listening{ background: var(--tithes); }
+  .tuner-hint{
+    margin-top: 12px;
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 12.5px;
+  }
+
+  /* ---------- utility row: theme, font size, offline ---------- */
+  .util-row{
+    display:flex;
+    align-items:center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .icon-btn{
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: inherit;
+  }
+  .fontsize-group{
+    display:flex;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .fontsize-group button{
+    border: none;
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 8px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    border-left: 1px solid var(--hairline);
+  }
+  .fontsize-group button:first-child{ border-left: none; }
+  .fontsize-group button.active{
+    background: var(--gold);
+    color: #fff;
+  }
+  .offline-badge{
+    display:none;
+    align-items:center;
+    gap: 5px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: var(--tithes);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .offline-badge.show{ display:flex; }
+  .wrap{ transition: none; }
+  .wrap.fs-0{ zoom: 0.9; }
+  .wrap.fs-2{ zoom: 1.15; }
+
+  /* ---------- Team tab: availability + reminders ---------- */
+  .whoami-row{
+    margin-bottom: 18px;
+  }
+  .avail-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .avail-row{
+    padding: 12px 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .avail-row:first-child{ border-top: none; }
+  .avail-top{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+  }
+  .avail-date{ font-size: 14.5px; font-weight: 600; }
+  .avail-toggle{
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--praise);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .avail-toggle.unavailable{
+    color: var(--tithes);
+    border-color: var(--tithes);
+  }
+  .avail-reason{
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .avail-reason::placeholder{ color: var(--text-dim); }
+  .notify-row{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .notify-status{
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .notify-status.done{ color: var(--praise); font-weight: 600; }
+  .notify-btn{
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .team-empty{
+    color: var(--text-dim);
+    font-size: 14px;
+    text-align:center;
+    padding: 16px 0;
+  }
+  .reminder-btn{
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 4px;
+  }
+  .reminder-btn.on{
+    border-color: var(--praise);
+    color: var(--praise);
+  }
+  .team-note{
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    text-align:center;
+  }
+
+  /* ---------- Keys tab: chord/lyrics panel ---------- */
+  .chord-header{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+  }
+  .chord-song-name{
+    font-family:'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .chord-textarea{
+    width: 100%;
+    min-height: 140px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-family: 'Menlo','Consolas',monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    resize: vertical;
+  }
+  .chord-textarea[disabled]{
+    opacity: 0.85;
+    resize: none;
+  }
+  .chord-textarea:disabled:placeholder-shown{
+    text-align:center;
+    padding-top: 50px;
+  }
+  .chord-actions{
+    display:flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .chord-actions button{ flex:1; }
+  .chord-search-link{
+    display:block;
+    text-align:center;
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* ---------- Schedule tab: setlist builder ---------- */
+  .setlist-toggle-btn{
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 14px;
+  }
+  .builder-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 14px;
+    display:none;
+  }
+  .builder-card.open{ display:block; }
+  .builder-row{
+    display:flex;
+    gap: 8px;
+  }
+  .builder-row select{ margin-bottom: 12px; }
+  .builder-add-btn{
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 10px;
+    border: none;
+    background: var(--gold);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 6px;
+  }
+  .builder-list{
+    margin: 14px 0 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .builder-item{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .builder-item-info{ min-width: 0; }
+  .builder-item-cat{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    font-weight: 700;
+    display:block;
+  }
+  .builder-item-song{
+    font-size: 14px;
+    color: var(--text);
+  }
+  .builder-remove-btn{
+    flex-shrink:0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--tithes);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .builder-empty{
+    padding: 14px 0;
+    color: var(--text-dim);
+    font-size: 13px;
+    text-align:center;
+  }
+  .builder-save-row{
+    display:flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .builder-save-row button{ flex:1; }
+  .builder-save-btn{
+    padding: 12px 0;
+    border-radius: 10px;
+    border: none;
+    background: var(--praise);
+    color: #08331a;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .builder-clear-btn{
+    padding: 12px 0;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .custom-lineup-badge{
+    display:inline-block;
+    margin-left: 8px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--praise);
+    font-size: 10.5px;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+
+  /* ---------- Team tab: My Part / My Schedule ---------- */
+  .mypart-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    overflow:hidden;
+    margin-bottom: 18px;
+  }
+  .mypart-row{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .mypart-row:first-child{ border-top: none; }
+  .mypart-row.past{ opacity: 0.5; }
+  .mypart-date{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    white-space: nowrap;
+  }
+  .mypart-roles{
+    text-align:right;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .mypart-roles .role-chip{
+    display:inline-block;
+    margin: 2px 0 2px 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -403,18 +1023,54 @@
     </div>
   </header>
 
+  <div class="util-row">
+    <span class="offline-badge" id="offlineBadge">⚡ Offline</span>
+    <div class="fontsize-group" id="fontSizeGroup">
+      <button data-fs="0">A-</button>
+      <button data-fs="1" class="active">A</button>
+      <button data-fs="2">A+</button>
+    </div>
+    <button class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+  </div>
+
   <div class="tabs">
     <button class="tab active" data-view="schedule">Schedule</button>
     <button class="tab" data-view="keys">Keys</button>
     <button class="tab" data-view="guidelines">Guidelines</button>
+    <button class="tab" data-view="tools">Tools</button>
+    <button class="tab" data-view="team">Team</button>
   </div>
 
   <section class="view active" id="view-schedule">
+    <div id="reminderBanner"></div>
     <label class="field-label" for="sundaySelect">Sunday</label>
     <select id="sundaySelect"></select>
     <div class="role-card" id="roleCard"></div>
     <p class="note" id="scheduleNote"></p>
     <div id="lineupSection"></div>
+    <button class="setlist-toggle-btn" id="builderToggleBtn">🎼 Build / Edit Lineup</button>
+    <div class="builder-card" id="builderCard">
+      <label class="field-label" for="builderCatSelect">Segment</label>
+      <select id="builderCatSelect">
+        <option>Call to Worship</option>
+        <option>Fast Song</option>
+        <option>Slow Song</option>
+        <option>Offertory</option>
+        <option>Victory Song</option>
+        <option>Other</option>
+      </select>
+      <label class="field-label" for="builderSongSelect">Song</label>
+      <select id="builderSongSelect"></select>
+      <label class="field-label" for="builderLinkInput">Link (optional)</label>
+      <input type="url" id="builderLinkInput" placeholder="https://youtube.com/…" style="width:100%; padding:14px 16px; border-radius:12px; border:1px solid var(--hairline); background:var(--surface); color:var(--text); font-size:15px; font-family:inherit; margin-bottom:14px;">
+      <button class="builder-add-btn" id="builderAddBtn">+ Add to Lineup</button>
+      <div class="builder-list" id="builderList"></div>
+      <div class="builder-save-row">
+        <button class="builder-clear-btn" id="builderClearBtn">Clear custom lineup</button>
+        <button class="builder-save-btn" id="builderSaveBtn">Save Lineup</button>
+      </div>
+      <p class="team-note">Saved lineups are stored on this device only (there's no shared server), so whoever builds it should share it in the group chat, or build it on the phone/computer the team screen uses.</p>
+    </div>
   </section>
 
   <section class="view" id="view-keys">
@@ -427,6 +1083,18 @@
     <select id="songSelect"></select>
     <div class="card" id="resultCard">
       <p class="empty-state">Pick a song to see who leads it and in what key.</p>
+    </div>
+    <div class="card" id="chordCard" style="margin-top:14px; display:none;">
+      <div class="chord-header">
+        <p class="chord-song-name" id="chordSongName"></p>
+        <button class="icon-btn" id="chordEditToggle" title="Add / edit chords">✏️</button>
+      </div>
+      <textarea id="chordText" class="chord-textarea" disabled placeholder="No chord chart saved for this song yet. Tap ✏️ to paste in your own chords/lyrics so the team can see them here next time."></textarea>
+      <div class="chord-actions" id="chordActions" style="display:none;">
+        <button class="reminder-btn" id="chordCancel">Cancel</button>
+        <button class="reminder-btn" id="chordSave" style="border-color: var(--praise); color: var(--praise);">Save</button>
+      </div>
+      <a class="chord-search-link" id="chordSearchLink" target="_blank" rel="noopener">🔍 Search for chords/lyrics online</a>
     </div>
   </section>
 
@@ -459,6 +1127,69 @@
       <li>All members are expected to attentively listen to the sermon during service (except teachers and assistant teachers serving in Children's Ministry).</li>
       <li>Members must dress modestly and appropriately at all times.</li>
     </ol>
+    <p class="callout">💬 Can't make it to a Saturday practice? Use the Team tab to mark it and get a ready-to-send message for the group chat.</p>
+  </section>
+
+  <section class="view" id="view-tools">
+    <h2 class="section-title" style="margin-top:0">Metronome</h2>
+    <div class="toolbox-card">
+      <div class="bpm-display">
+        <span class="bpm-value" id="bpmValue">100</span>
+        <span class="bpm-unit">BPM</span>
+      </div>
+      <div class="bpm-stepper">
+        <button class="bpm-btn" id="bpmDown">−</button>
+        <input type="range" id="bpmSlider" min="40" max="240" value="100" class="bpm-slider" style="width:140px; margin:0;">
+        <button class="bpm-btn" id="bpmUp">+</button>
+      </div>
+      <div class="pillrow" id="timeSigRow" style="justify-content:center"></div>
+      <div class="beatrow" id="beatRow"></div>
+      <div class="transport-row">
+        <button class="transport-btn" id="metroToggle">▶ Start</button>
+        <button class="taptempo-btn" id="tapTempo">Tap Tempo</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">Tuner</h2>
+    <div class="toolbox-card">
+      <div class="langrow" id="instrumentRow">
+        <button class="langbtn active" data-instrument="guitar">Guitar</button>
+        <button class="langbtn" data-instrument="bass">Bass</button>
+      </div>
+      <div class="string-row" id="stringRow"></div>
+      <div class="tuner-note-display">
+        <span class="tuner-note" id="tunerNote">—</span><span class="tuner-octave" id="tunerOctave"></span>
+      </div>
+      <p class="tuner-freq" id="tunerFreq">Tap a string to hear it, or start the mic to tune live</p>
+      <div class="tuner-meter">
+        <div class="tuner-needle" id="tunerNeedle"></div>
+      </div>
+      <p class="tuner-status" id="tunerStatus"></p>
+      <button class="mic-btn" id="micToggle">🎤 Start Tuner</button>
+      <p class="tuner-hint" id="tunerHint">Uses your microphone — nothing is recorded or sent anywhere.</p>
+    </div>
+  </section>
+
+  <section class="view" id="view-team">
+    <label class="field-label" for="whoamiSelect">Who are you?</label>
+    <div class="whoami-row">
+      <select id="whoamiSelect"></select>
+    </div>
+
+    <h2 class="section-title" style="margin-top:0">My Part</h2>
+    <div class="mypart-card" id="myPartCard"></div>
+    <p class="team-note" id="myPartEmptyNote"></p>
+
+    <h2 class="section-title">My Availability</h2>
+    <div class="avail-card" id="availCard"></div>
+    <p class="team-note" id="availEmptyNote"></p>
+
+    <h2 class="section-title">Practice Reminders</h2>
+    <div class="toolbox-card">
+      <button class="reminder-btn" id="reminderToggle">🔔 Enable Practice Reminders</button>
+      <p class="team-note">Shows a reminder the evening before practice, when you open the app on this device. This is a local, on-device reminder — it can't wake up a closed app the way a real push notification would.</p>
+    </div>
+    <p class="team-note">Availability and reminders are saved on this device only — they don't sync automatically across everyone's phones. Use "Copy message" to share your status in the group chat.</p>
   </section>
 </div>
 
@@ -607,10 +1338,22 @@ const lineups = {
   ],
 };
 
+/* Custom (leader-built) lineups, saved on this device and preferred over
+   the hardcoded `lineups` object above when present for a date. */
+function loadCustomLineups(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-custom-lineups') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveCustomLineups(data){
+  localStorage.setItem('dwccim-custom-lineups', JSON.stringify(data));
+}
+
 function renderLineup(date){
   const el = document.getElementById('lineupSection');
-  const items = lineups[date];
-  if(!items){
+  const custom = loadCustomLineups();
+  const isCustom = !!(custom[date] && custom[date].length);
+  const items = isCustom ? custom[date] : lineups[date];
+  if(!items || items.length === 0){
     el.innerHTML = '';
     return;
   }
@@ -624,7 +1367,8 @@ function renderLineup(date){
       ${item.link ? `<a class="lineup-link" href="${item.link}" target="_blank" rel="noopener">${ytIcon}</a>` : ''}
     </div>
   `).join('');
-  el.innerHTML = `<div class="lineup-card"><p class="lineup-title">Song Lineup</p>${rows}</div>`;
+  const badge = isCustom ? '<span class="custom-lineup-badge">Custom</span>' : '';
+  el.innerHTML = `<div class="lineup-card"><p class="lineup-title">Song Lineup${badge}</p>${rows}</div>`;
 }
 
 const catLabels = {
@@ -675,17 +1419,20 @@ function renderSchedule(date){
   renderLineup(date);
 }
 
+// Maps each schedule label to its actual calendar date (ISO). Shared by the
+// default-date picker, the practice reminder, and the availability list.
+const sundayDateMap = {
+  "Sept 6":"2026-09-06","Sept 13":"2026-09-13","Sept 20":"2026-09-20","Sept 27":"2026-09-27",
+  "Oct 4":"2026-10-04","Oct 11":"2026-10-11","Oct 18":"2026-10-18","Oct 25":"2026-10-25",
+  "Nov 1":"2026-11-01","Nov 8":"2026-11-08","Nov 15":"2026-11-15","Nov 22":"2026-11-22","Nov 29":"2026-11-29",
+  "Dec 6":"2026-12-06","Dec 13":"2026-12-13","Dec 20":"2026-12-20","Dec 27":"2026-12-27"
+};
+
 // default to nearest upcoming Sunday in the list; fallback to first
 function pickDefaultDate(){
-  const dateMap = {
-    "Sept 6":"2026-09-06","Sept 13":"2026-09-13","Sept 20":"2026-09-20","Sept 27":"2026-09-27",
-    "Oct 4":"2026-10-04","Oct 11":"2026-10-11","Oct 18":"2026-10-18","Oct 25":"2026-10-25",
-    "Nov 1":"2026-11-01","Nov 8":"2026-11-08","Nov 15":"2026-11-15","Nov 22":"2026-11-22","Nov 29":"2026-11-29",
-    "Dec 6":"2026-12-06","Dec 13":"2026-12-13","Dec 20":"2026-12-20","Dec 27":"2026-12-27"
-  };
   const today = new Date();
   for(const d of schedule.dates){
-    if(new Date(dateMap[d] + "T23:59:59") >= today) return d;
+    if(new Date(sundayDateMap[d] + "T23:59:59") >= today) return d;
   }
   return schedule.dates[schedule.dates.length-1];
 }
@@ -693,7 +1440,112 @@ function pickDefaultDate(){
 const defaultDate = pickDefaultDate();
 sundaySelect.value = defaultDate;
 renderSchedule(defaultDate);
-sundaySelect.addEventListener('change', ()=> renderSchedule(sundaySelect.value));
+sundaySelect.addEventListener('change', ()=>{
+  renderSchedule(sundaySelect.value);
+  if(builderCardEl.classList.contains('open')) openBuilderForDate(sundaySelect.value);
+});
+
+/* ---------- SETLIST BUILDER: pick songs from keysData, auto-build the lineup ---------- */
+const builderToggleBtn = document.getElementById('builderToggleBtn');
+const builderCardEl = document.getElementById('builderCard');
+const builderCatSelect = document.getElementById('builderCatSelect');
+const builderSongSelect = document.getElementById('builderSongSelect');
+const builderLinkInput = document.getElementById('builderLinkInput');
+const builderAddBtn = document.getElementById('builderAddBtn');
+const builderListEl = document.getElementById('builderList');
+const builderSaveBtn = document.getElementById('builderSaveBtn');
+const builderClearBtn = document.getElementById('builderClearBtn');
+
+let builderDraft = [];
+
+function populateBuilderSongSelect(){
+  builderSongSelect.innerHTML = '';
+  Object.entries(keysData).forEach(([lang, cats])=>{
+    Object.entries(cats).forEach(([cat, list])=>{
+      const og = document.createElement('optgroup');
+      og.label = lang + ' \u2014 ' + catLabels[cat][lang];
+      list.forEach(([name])=>{
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        og.appendChild(opt);
+      });
+      builderSongSelect.appendChild(og);
+    });
+  });
+}
+populateBuilderSongSelect();
+
+function renderBuilderList(){
+  if(builderDraft.length === 0){
+    builderListEl.innerHTML = '<p class="builder-empty">No songs added yet \u2014 pick a segment and song above, then "Add to Lineup".</p>';
+    return;
+  }
+  builderListEl.innerHTML = builderDraft.map((item, i)=>`
+    <div class="builder-item">
+      <div class="builder-item-info">
+        <span class="builder-item-cat">${item.category}</span>
+        <span class="builder-item-song">${item.title}</span>
+      </div>
+      <button class="builder-remove-btn" data-idx="${i}" title="Remove">\u2715</button>
+    </div>
+  `).join('');
+  builderListEl.querySelectorAll('.builder-remove-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      builderDraft.splice(parseInt(btn.dataset.idx, 10), 1);
+      renderBuilderList();
+    });
+  });
+}
+
+function openBuilderForDate(date){
+  const custom = loadCustomLineups();
+  builderDraft = custom[date] ? custom[date].map(it=> Object.assign({}, it)) : [];
+  renderBuilderList();
+}
+
+builderToggleBtn.addEventListener('click', ()=>{
+  const isOpen = builderCardEl.classList.toggle('open');
+  builderToggleBtn.textContent = isOpen ? '\u25B2 Close Lineup Builder' : '\uD83C\uDFBC Build / Edit Lineup';
+  if(isOpen) openBuilderForDate(sundaySelect.value);
+});
+
+builderAddBtn.addEventListener('click', ()=>{
+  const title = builderSongSelect.value;
+  if(!title) return;
+  builderDraft.push({
+    category: builderCatSelect.value,
+    title,
+    link: builderLinkInput.value.trim() || null,
+  });
+  builderLinkInput.value = '';
+  renderBuilderList();
+});
+
+builderSaveBtn.addEventListener('click', ()=>{
+  const date = sundaySelect.value;
+  const custom = loadCustomLineups();
+  if(builderDraft.length === 0){
+    delete custom[date];
+  } else {
+    custom[date] = builderDraft.map(it=> Object.assign({}, it));
+  }
+  saveCustomLineups(custom);
+  renderLineup(date);
+  const original = builderSaveBtn.textContent;
+  builderSaveBtn.textContent = 'Saved!';
+  setTimeout(()=>{ builderSaveBtn.textContent = original; }, 1200);
+});
+
+builderClearBtn.addEventListener('click', ()=>{
+  const date = sundaySelect.value;
+  const custom = loadCustomLineups();
+  delete custom[date];
+  saveCustomLineups(custom);
+  builderDraft = [];
+  renderBuilderList();
+  renderLineup(date);
+});
 
 /* ---------- KEYS VIEW ---------- */
 let currentLang = 'English';
@@ -733,23 +1585,83 @@ function renderResult(songName){
   const card = document.getElementById('resultCard');
   if(!songName){
     card.innerHTML = '<p class="empty-state">Pick a song to see who leads it and in what key.</p>';
+    renderChordCard('');
     return;
   }
   const list = keysData[currentLang][currentCat];
   const entry = list.find(([name])=> name === songName);
   if(!entry){
     card.innerHTML = '<p class="empty-state">Song not found.</p>';
+    renderChordCard('');
     return;
   }
   const [, leaders] = entry;
   const names = Object.keys(leaders);
   if(names.length === 0){
     card.innerHTML = `<p class="song-name">${songName}</p><p class="empty-state">No key recorded.</p>`;
+  } else {
+    let rows = names.map(n=>`<div class="leader-row"><span class="name">${n}</span><span class="key">${leaders[n]}</span></div>`).join('');
+    card.innerHTML = `<p class="song-name">${songName}</p>${rows}`;
+  }
+  renderChordCard(songName);
+}
+
+/* ---------- KEYS VIEW: chords/lyrics panel ----------
+   No lyrics/chords ship with the app (copyrighted worship-song lyrics
+   can't be pre-loaded here). Instead each song has an empty slot that
+   any team member can fill in with their own chart — saved on this
+   device via localStorage, keyed by song name. */
+function loadChordCharts(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-chordcharts') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveChordCharts(data){
+  localStorage.setItem('dwccim-chordcharts', JSON.stringify(data));
+}
+
+const chordCardEl = document.getElementById('chordCard');
+const chordSongNameEl = document.getElementById('chordSongName');
+const chordTextEl = document.getElementById('chordText');
+const chordActionsEl = document.getElementById('chordActions');
+const chordEditToggleBtn = document.getElementById('chordEditToggle');
+const chordSaveBtn = document.getElementById('chordSave');
+const chordCancelBtn = document.getElementById('chordCancel');
+const chordSearchLinkEl = document.getElementById('chordSearchLink');
+let chordCurrentSong = '';
+
+function renderChordCard(songName){
+  chordCurrentSong = songName;
+  if(!songName){
+    chordCardEl.style.display = 'none';
     return;
   }
-  let rows = names.map(n=>`<div class="leader-row"><span class="name">${n}</span><span class="key">${leaders[n]}</span></div>`).join('');
-  card.innerHTML = `<p class="song-name">${songName}</p>${rows}`;
+  chordCardEl.style.display = 'block';
+  chordSongNameEl.textContent = songName;
+  const charts = loadChordCharts();
+  chordTextEl.value = charts[songName] || '';
+  chordTextEl.disabled = true;
+  chordActionsEl.style.display = 'none';
+  chordEditToggleBtn.style.display = 'flex';
+  chordSearchLinkEl.href = 'https://www.google.com/search?q=' + encodeURIComponent(songName + ' chords lyrics');
 }
+
+chordEditToggleBtn.addEventListener('click', ()=>{
+  chordTextEl.disabled = false;
+  chordTextEl.focus();
+  chordActionsEl.style.display = 'flex';
+});
+
+chordCancelBtn.addEventListener('click', ()=>{
+  renderChordCard(chordCurrentSong);
+});
+
+chordSaveBtn.addEventListener('click', ()=>{
+  const charts = loadChordCharts();
+  const text = chordTextEl.value.trim();
+  if(text){ charts[chordCurrentSong] = text; } else { delete charts[chordCurrentSong]; }
+  saveChordCharts(charts);
+  renderChordCard(chordCurrentSong);
+});
 
 document.querySelectorAll('.langbtn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -765,6 +1677,690 @@ songSelect.addEventListener('change', ()=> renderResult(songSelect.value));
 
 renderPills();
 renderSongOptions();
+
+/* ---------- TOOLS: shared audio context ---------- */
+let toolsAudioCtx = null;
+function getAudioCtx(){
+  if(!toolsAudioCtx){
+    toolsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(toolsAudioCtx.state === 'suspended') toolsAudioCtx.resume();
+  return toolsAudioCtx;
+}
+
+/* ---------- METRONOME ---------- */
+const bpmValueEl = document.getElementById('bpmValue');
+const bpmSlider = document.getElementById('bpmSlider');
+const beatRowEl = document.getElementById('beatRow');
+const timeSigRowEl = document.getElementById('timeSigRow');
+const metroToggleBtn = document.getElementById('metroToggle');
+
+let bpm = 100;
+let beatsPerBar = 4;
+let metroRunning = false;
+let currentBeat = 0;
+let nextNoteTime = 0.0;
+let metroTimerID = null;
+const lookahead = 25.0;       // ms
+const scheduleAheadTime = 0.1; // seconds
+let scheduledBeats = [];
+let rafID = null;
+
+const timeSigs = [
+  {label:'2/4', beats:2},
+  {label:'3/4', beats:3},
+  {label:'4/4', beats:4},
+  {label:'6/8', beats:6},
+];
+
+function renderTimeSigs(){
+  timeSigRowEl.innerHTML = '';
+  timeSigs.forEach(sig=>{
+    const b = document.createElement('button');
+    b.className = 'pill' + (sig.beats === beatsPerBar ? ' active' : '');
+    b.textContent = sig.label;
+    b.addEventListener('click', ()=>{
+      beatsPerBar = sig.beats;
+      currentBeat = 0;
+      renderTimeSigs();
+      renderBeatDots();
+    });
+    timeSigRowEl.appendChild(b);
+  });
+}
+
+function renderBeatDots(){
+  beatRowEl.innerHTML = '';
+  for(let i=0;i<beatsPerBar;i++){
+    const d = document.createElement('div');
+    d.className = 'beat-dot';
+    beatRowEl.appendChild(d);
+  }
+}
+
+function setBpm(val){
+  bpm = Math.max(40, Math.min(240, Math.round(val)));
+  bpmValueEl.textContent = bpm;
+  bpmSlider.value = bpm;
+}
+
+function metroNextNote(){
+  const secondsPerBeat = 60.0 / bpm;
+  nextNoteTime += secondsPerBeat;
+  currentBeat = (currentBeat + 1) % beatsPerBar;
+}
+
+function metroScheduleNote(beatNumber, time){
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const envelope = ctx.createGain();
+  osc.frequency.value = (beatNumber === 0) ? 1400 : 900;
+  envelope.gain.setValueAtTime(0.0001, time);
+  envelope.gain.exponentialRampToValueAtTime(1, time + 0.001);
+  envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+  osc.connect(envelope);
+  envelope.connect(ctx.destination);
+  osc.start(time);
+  osc.stop(time + 0.06);
+  scheduledBeats.push({ beat: beatNumber, time });
+}
+
+function metroScheduler(){
+  const ctx = getAudioCtx();
+  while(nextNoteTime < ctx.currentTime + scheduleAheadTime){
+    metroScheduleNote(currentBeat, nextNoteTime);
+    metroNextNote();
+  }
+  metroTimerID = setTimeout(metroScheduler, lookahead);
+}
+
+function metroVisualLoop(){
+  if(!metroRunning) return;
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  while(scheduledBeats.length && scheduledBeats[0].time <= now){
+    const b = scheduledBeats.shift();
+    const dots = beatRowEl.querySelectorAll('.beat-dot');
+    dots.forEach(d=>d.classList.remove('on','downbeat'));
+    const dot = dots[b.beat];
+    if(dot){
+      dot.classList.add('on');
+      if(b.beat === 0) dot.classList.add('downbeat');
+      setTimeout(()=> dot.classList.remove('on','downbeat'), 100);
+    }
+  }
+  rafID = requestAnimationFrame(metroVisualLoop);
+}
+
+function startMetronome(){
+  const ctx = getAudioCtx();
+  metroRunning = true;
+  currentBeat = 0;
+  scheduledBeats = [];
+  nextNoteTime = ctx.currentTime + 0.05;
+  metroScheduler();
+  metroVisualLoop();
+  metroToggleBtn.textContent = '■ Stop';
+  metroToggleBtn.classList.add('stop');
+}
+
+function stopMetronome(){
+  metroRunning = false;
+  clearTimeout(metroTimerID);
+  cancelAnimationFrame(rafID);
+  scheduledBeats = [];
+  beatRowEl.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('on','downbeat'));
+  metroToggleBtn.textContent = '▶ Start';
+  metroToggleBtn.classList.remove('stop');
+}
+
+metroToggleBtn.addEventListener('click', ()=>{
+  if(metroRunning) stopMetronome(); else startMetronome();
+});
+
+document.getElementById('bpmDown').addEventListener('click', ()=> setBpm(bpm - 1));
+document.getElementById('bpmUp').addEventListener('click', ()=> setBpm(bpm + 1));
+bpmSlider.addEventListener('input', ()=> setBpm(parseInt(bpmSlider.value, 10)));
+
+let tapTimes = [];
+document.getElementById('tapTempo').addEventListener('click', ()=>{
+  const now = performance.now();
+  tapTimes = tapTimes.filter(t => now - t < 2500);
+  tapTimes.push(now);
+  if(tapTimes.length >= 2){
+    const intervals = [];
+    for(let i=1;i<tapTimes.length;i++) intervals.push(tapTimes[i]-tapTimes[i-1]);
+    const avg = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+    setBpm(60000 / avg);
+  }
+});
+
+renderTimeSigs();
+renderBeatDots();
+setBpm(bpm);
+
+/* ---------- TUNER ---------- */
+const tunerNoteEl = document.getElementById('tunerNote');
+const tunerOctaveEl = document.getElementById('tunerOctave');
+const tunerFreqEl = document.getElementById('tunerFreq');
+const tunerNeedleEl = document.getElementById('tunerNeedle');
+const tunerStatusEl = document.getElementById('tunerStatus');
+const micToggleBtn = document.getElementById('micToggle');
+const stringRowEl = document.getElementById('stringRow');
+const tunerHintEl = document.getElementById('tunerHint');
+
+const noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+const stringSets = {
+  guitar: [
+    {name:'E', octave:2, freq:82.41},
+    {name:'A', octave:2, freq:110.00},
+    {name:'D', octave:3, freq:146.83},
+    {name:'G', octave:3, freq:196.00},
+    {name:'B', octave:3, freq:246.94},
+    {name:'E', octave:4, freq:329.63},
+  ],
+  bass: [
+    {name:'E', octave:1, freq:41.20},
+    {name:'A', octave:1, freq:55.00},
+    {name:'D', octave:2, freq:73.42},
+    {name:'G', octave:2, freq:98.00},
+  ],
+};
+let currentInstrument = 'guitar';
+
+function renderStrings(){
+  stringRowEl.innerHTML = '';
+  stringSets[currentInstrument].forEach(s=>{
+    const btn = document.createElement('button');
+    btn.className = 'string-btn';
+    btn.textContent = s.name;
+    btn.dataset.freq = s.freq;
+    btn.addEventListener('click', ()=> playReferenceTone(s.freq));
+    stringRowEl.appendChild(btn);
+  });
+}
+
+document.querySelectorAll('#instrumentRow .langbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#instrumentRow .langbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentInstrument = btn.dataset.instrument;
+    renderStrings();
+  });
+});
+
+function playReferenceTone(freq){
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const envelope = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  const t = ctx.currentTime;
+  envelope.gain.setValueAtTime(0.0001, t);
+  envelope.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+  envelope.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+  osc.connect(envelope);
+  envelope.connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + 1.4);
+}
+
+function freqToNoteInfo(freq){
+  const midi = 69 + 12 * Math.log2(freq / 440);
+  const rounded = Math.round(midi);
+  const cents = Math.round((midi - rounded) * 100);
+  const name = noteNames[((rounded % 12) + 12) % 12];
+  const octave = Math.floor(rounded / 12) - 1;
+  return { name, octave, cents };
+}
+
+// Autocorrelation-based pitch detector (time-domain, RMS-gated).
+function detectPitch(buf, sampleRate){
+  const size = buf.length;
+  let rms = 0;
+  for(let i=0;i<size;i++) rms += buf[i]*buf[i];
+  rms = Math.sqrt(rms/size);
+  if(rms < 0.01) return -1;
+
+  let start = 0, end = size - 1;
+  const thresh = 0.2;
+  for(let i=0;i<size/2;i++){ if(Math.abs(buf[i]) > thresh){ start = i; break; } }
+  for(let i=1;i<size/2;i++){ if(Math.abs(buf[size-i]) > thresh){ end = size-i; break; } }
+  const trimmed = buf.slice(start, end);
+  const n = trimmed.length;
+  if(n < 512) return -1;
+
+  const corr = new Array(n).fill(0);
+  for(let lag=0; lag<n; lag++){
+    let sum = 0;
+    for(let i=0; i<n-lag; i++) sum += trimmed[i] * trimmed[i+lag];
+    corr[lag] = sum;
+  }
+
+  let d = 0;
+  while(d < n-1 && corr[d] > corr[d+1]) d++;
+  let maxVal = -1, maxPos = -1;
+  for(let i=d; i<n; i++){
+    if(corr[i] > maxVal){ maxVal = corr[i]; maxPos = i; }
+  }
+  if(maxPos <= 0) return -1;
+
+  const x1 = corr[maxPos-1] || 0, x2 = corr[maxPos], x3 = corr[maxPos+1] || 0;
+  const a = (x1 + x3 - 2*x2) / 2;
+  const b = (x3 - x1) / 2;
+  let refinedPos = maxPos;
+  if(a !== 0) refinedPos = maxPos - b / (2*a);
+
+  const freq = sampleRate / refinedPos;
+  if(freq < 25 || freq > 1200) return -1;
+  return freq;
+}
+
+let tunerStream = null;
+let tunerAnalyser = null;
+let tunerBuf = null;
+let tunerRunning = false;
+let tunerRafID = null;
+
+function updateTunerDisplay(freq){
+  if(freq === -1){
+    tunerNoteEl.textContent = '—';
+    tunerOctaveEl.textContent = '';
+    tunerFreqEl.textContent = 'Listening…';
+    tunerNeedleEl.style.left = '50%';
+    tunerNeedleEl.className = 'tuner-needle';
+    tunerStatusEl.textContent = '';
+    tunerStatusEl.className = 'tuner-status';
+    stringRowEl.querySelectorAll('.string-btn').forEach(b=>b.classList.remove('match'));
+    return;
+  }
+  const { name, octave, cents } = freqToNoteInfo(freq);
+  tunerNoteEl.textContent = name;
+  tunerOctaveEl.textContent = octave;
+  tunerFreqEl.textContent = freq.toFixed(1) + ' Hz';
+
+  const clamped = Math.max(-50, Math.min(50, cents));
+  const pct = 50 + (clamped / 50) * 45;
+  tunerNeedleEl.style.left = pct + '%';
+
+  let stateClass = 'off', stateLabel = cents > 0 ? 'Sharp' : 'Flat';
+  if(Math.abs(cents) <= 5){ stateClass = 'in-tune'; stateLabel = 'In tune'; }
+  else if(Math.abs(cents) <= 15){ stateClass = 'close'; stateLabel = cents > 0 ? 'Slightly sharp' : 'Slightly flat'; }
+  tunerNeedleEl.className = 'tuner-needle ' + stateClass;
+  tunerStatusEl.textContent = stateLabel + (stateClass !== 'in-tune' ? ' (' + (cents>0?'+':'') + cents + '\u00A2)' : '');
+  tunerStatusEl.className = 'tuner-status ' + stateClass;
+
+  stringRowEl.querySelectorAll('.string-btn').forEach(b=>{
+    const sFreq = parseFloat(b.dataset.freq);
+    const sInfo = freqToNoteInfo(sFreq);
+    const isMatch = sInfo.name === name && sInfo.octave === octave && Math.abs(cents) <= 15;
+    b.classList.toggle('match', isMatch);
+  });
+}
+
+function tunerLoop(){
+  if(!tunerRunning) return;
+  tunerAnalyser.getFloatTimeDomainData(tunerBuf);
+  const ctx = getAudioCtx();
+  const freq = detectPitch(tunerBuf, ctx.sampleRate);
+  updateTunerDisplay(freq);
+  tunerRafID = requestAnimationFrame(tunerLoop);
+}
+
+async function startTuner(){
+  try{
+    tunerStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+  }catch(err){
+    tunerHintEl.textContent = 'Microphone access was blocked or unavailable. Check your browser/site permissions and try again.';
+    return;
+  }
+  const ctx = getAudioCtx();
+  const source = ctx.createMediaStreamSource(tunerStream);
+  tunerAnalyser = ctx.createAnalyser();
+  tunerAnalyser.fftSize = 2048;
+  source.connect(tunerAnalyser);
+  tunerBuf = new Float32Array(tunerAnalyser.fftSize);
+  tunerRunning = true;
+  micToggleBtn.textContent = '🎤 Stop Tuner';
+  micToggleBtn.classList.add('listening');
+  tunerHintEl.textContent = 'Play a single string and hold it steady.';
+  tunerLoop();
+}
+
+function stopTuner(){
+  tunerRunning = false;
+  cancelAnimationFrame(tunerRafID);
+  if(tunerStream){
+    tunerStream.getTracks().forEach(t => t.stop());
+    tunerStream = null;
+  }
+  micToggleBtn.textContent = '🎤 Start Tuner';
+  micToggleBtn.classList.remove('listening');
+  tunerHintEl.textContent = 'Uses your microphone — nothing is recorded or sent anywhere.';
+  updateTunerDisplay(-1);
+}
+
+micToggleBtn.addEventListener('click', ()=>{
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    tunerHintEl.textContent = 'Your browser does not support microphone access here.';
+    return;
+  }
+  if(tunerRunning) stopTuner(); else startTuner();
+});
+
+renderStrings();
+
+// Pause metronome/mic when leaving the Tools tab to save battery & release the mic.
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.dataset.view !== 'tools'){
+      if(metroRunning) stopMetronome();
+      if(tunerRunning) stopTuner();
+    }
+  });
+});
+
+/* ---------- THEME TOGGLE ---------- */
+const themeToggleBtn = document.getElementById('themeToggle');
+function applyTheme(theme){
+  if(theme === 'light'){
+    document.documentElement.setAttribute('data-theme', 'light');
+    themeToggleBtn.textContent = '☀️';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    themeToggleBtn.textContent = '🌙';
+  }
+  localStorage.setItem('dwccim-theme', theme);
+}
+applyTheme(localStorage.getItem('dwccim-theme') || 'dark');
+themeToggleBtn.addEventListener('click', ()=>{
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  applyTheme(isLight ? 'dark' : 'light');
+});
+
+/* ---------- FONT SIZE TOGGLE ---------- */
+const wrapEl = document.querySelector('.wrap');
+const fontSizeGroup = document.getElementById('fontSizeGroup');
+function applyFontSize(level){
+  wrapEl.classList.remove('fs-0', 'fs-2');
+  if(level === '0') wrapEl.classList.add('fs-0');
+  if(level === '2') wrapEl.classList.add('fs-2');
+  fontSizeGroup.querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.fs === level);
+  });
+  localStorage.setItem('dwccim-fontsize', level);
+}
+applyFontSize(localStorage.getItem('dwccim-fontsize') || '1');
+fontSizeGroup.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=> applyFontSize(b.dataset.fs));
+});
+
+/* ---------- OFFLINE BADGE ---------- */
+const offlineBadgeEl = document.getElementById('offlineBadge');
+function updateOnlineStatus(){
+  offlineBadgeEl.classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+/* ---------- TEAM: name aliases ----------
+   The schedule data spells the same person differently across roles
+   (e.g. the Worship Leader row says "Sis Lorraine" while the Bass Guitar
+   row just says "Lorraine"). This map merges known aliases into one
+   canonical name so they show up as a single person everywhere in the
+   Team tab. Add more entries here if another name is ever split like this. */
+const nameAliases = {
+  "Sis Lorraine": "Lorraine",
+  "Sis Jove": "Jove",
+  "Sis Ming": "Ming",
+};
+function canonicalName(raw){
+  return nameAliases[raw] || raw;
+}
+
+/* ---------- TEAM: derive member names from the schedule ---------- */
+function deriveTeamNames(){
+  const names = new Set();
+  Object.values(schedule.roles).forEach(byDate=>{
+    Object.values(byDate).forEach(cell=>{
+      cell.split(/\/|&/).forEach(part=>{
+        const n = canonicalName(part.trim());
+        if(n) names.add(n);
+      });
+    });
+  });
+  return Array.from(names).sort();
+}
+const teamNames = deriveTeamNames();
+
+const whoamiSelect = document.getElementById('whoamiSelect');
+whoamiSelect.innerHTML = '<option value="">Select your name…</option>' +
+  teamNames.map(n=>`<option value="${n}">${n}</option>`).join('');
+const savedName = localStorage.getItem('dwccim-myname') || '';
+whoamiSelect.value = savedName;
+whoamiSelect.addEventListener('change', ()=>{
+  localStorage.setItem('dwccim-myname', whoamiSelect.value);
+  renderAvailability();
+  renderMyPart();
+});
+
+/* ---------- TEAM: My Part — every date + role for the selected person ---------- */
+const myPartCardEl = document.getElementById('myPartCard');
+const myPartEmptyNoteEl = document.getElementById('myPartEmptyNote');
+
+function findMyRolesForDate(name, date){
+  const roles = [];
+  Object.keys(schedule.roles).forEach(role=>{
+    const cell = schedule.roles[role][date];
+    if(!cell) return;
+    const people = cell.split(/\/|&/).map(p=> canonicalName(p.trim()));
+    if(people.includes(name)) roles.push(role);
+  });
+  return roles;
+}
+
+function renderMyPart(){
+  const name = whoamiSelect.value;
+  myPartCardEl.innerHTML = '';
+  if(!name){
+    myPartEmptyNoteEl.textContent = 'Pick your name above to see every Sunday you\u2019re scheduled and for what.';
+    return;
+  }
+  const todayIso = new Date().toISOString().slice(0,10);
+  const rows = schedule.dates
+    .map(date => ({ date, roles: findMyRolesForDate(name, date) }))
+    .filter(d => d.roles.length > 0);
+
+  if(rows.length === 0){
+    myPartEmptyNoteEl.textContent = '';
+    myPartCardEl.innerHTML = '<p class="team-empty">No scheduled dates found for ' + name + '.</p>';
+    return;
+  }
+  myPartEmptyNoteEl.textContent = '';
+  myPartCardEl.innerHTML = rows.map(({date, roles})=>{
+    const iso = sundayDateMap[date];
+    const isPast = iso && iso < todayIso;
+    const chips = roles.map(r=>`<span class="role-chip">${r}</span>`).join('');
+    return `<div class="mypart-row${isPast ? ' past' : ''}"><span class="mypart-date">${date}${date === schedule.fifthSunday ? ' 🗓️' : ''}</span><span class="mypart-roles">${chips}</span></div>`;
+  }).join('');
+}
+renderMyPart();
+
+/* ---------- TEAM: availability store (per device, keyed by name+date) ---------- */
+function loadAvailability(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-availability') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveAvailability(data){
+  localStorage.setItem('dwccim-availability', JSON.stringify(data));
+}
+function availKey(name, date){ return name + '::' + date; }
+
+function upcomingDates(){
+  const today = new Date();
+  return schedule.dates.filter(d=>{
+    const iso = sundayDateMap[d];
+    return iso && new Date(iso + "T23:59:59") >= today;
+  });
+}
+
+const availCardEl = document.getElementById('availCard');
+const availEmptyNoteEl = document.getElementById('availEmptyNote');
+
+function renderAvailability(){
+  const name = whoamiSelect.value;
+  availCardEl.innerHTML = '';
+  if(!name){
+    availEmptyNoteEl.textContent = 'Pick your name above to mark Saturdays you can\u2019t make it to.';
+    return;
+  }
+  availEmptyNoteEl.textContent = '';
+  const data = loadAvailability();
+  const dates = upcomingDates();
+  if(dates.length === 0){
+    availCardEl.innerHTML = '<p class="team-empty">No upcoming Saturdays on the calendar.</p>';
+    return;
+  }
+  dates.forEach(date=>{
+    const key = availKey(name, date);
+    const entry = data[key] || { unavailable:false, reason:'', notified:false };
+
+    const row = document.createElement('div');
+    row.className = 'avail-row';
+
+    const top = document.createElement('div');
+    top.className = 'avail-top';
+    top.innerHTML = `<span class="avail-date">${date}</span>`;
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'avail-toggle' + (entry.unavailable ? ' unavailable' : '');
+    toggleBtn.textContent = entry.unavailable ? "Can't make it" : 'Available';
+    toggleBtn.addEventListener('click', ()=>{
+      entry.unavailable = !entry.unavailable;
+      if(!entry.unavailable){ entry.notified = false; entry.reason = ''; }
+      data[key] = entry;
+      saveAvailability(data);
+      renderAvailability();
+    });
+    top.appendChild(toggleBtn);
+    row.appendChild(top);
+
+    if(entry.unavailable){
+      const reasonInput = document.createElement('input');
+      reasonInput.className = 'avail-reason';
+      reasonInput.placeholder = 'Reason (optional)';
+      reasonInput.value = entry.reason || '';
+      reasonInput.addEventListener('input', ()=>{
+        entry.reason = reasonInput.value;
+        data[key] = entry;
+        saveAvailability(data);
+      });
+      row.appendChild(reasonInput);
+
+      const notifyRow = document.createElement('div');
+      notifyRow.className = 'notify-row';
+      const statusSpan = document.createElement('span');
+      statusSpan.className = 'notify-status' + (entry.notified ? ' done' : '');
+      statusSpan.textContent = entry.notified ? '✓ Notified via group chat' : 'Not yet notified';
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'notify-btn';
+      copyBtn.textContent = 'Copy message';
+      copyBtn.addEventListener('click', async ()=>{
+        const msg = `Hi team, I won't be able to make it to Saturday practice on ${date}.` + (entry.reason ? ` Reason: ${entry.reason}` : '');
+        try{
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            await navigator.clipboard.writeText(msg);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = msg;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+          copyBtn.textContent = 'Copied!';
+        }catch(e){
+          copyBtn.textContent = 'Copy failed';
+        }
+        entry.notified = true;
+        data[key] = entry;
+        saveAvailability(data);
+        setTimeout(()=> renderAvailability(), 700);
+      });
+      notifyRow.appendChild(statusSpan);
+      notifyRow.appendChild(copyBtn);
+      row.appendChild(notifyRow);
+    }
+
+    availCardEl.appendChild(row);
+  });
+}
+
+renderAvailability();
+
+/* ---------- PRACTICE REMINDER (local, on-device) ---------- */
+const reminderBannerEl = document.getElementById('reminderBanner');
+const reminderToggleBtn = document.getElementById('reminderToggle');
+
+function findPracticeInfoForTomorrow(){
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0,10);
+  for(const label of schedule.dates){
+    if(sundayDateMap[label] === tomorrowStr) return label;
+  }
+  return null;
+}
+
+function renderReminderBanner(){
+  const practiceLabel = findPracticeInfoForTomorrow();
+  if(!practiceLabel){
+    reminderBannerEl.innerHTML = '';
+    return;
+  }
+  reminderBannerEl.innerHTML = `<p class="callout" style="margin-top:0">🔔 Practice is tomorrow (${practiceLabel}) — Call Time 9:00 AM, Devotion 9:30 AM.</p>`;
+}
+renderReminderBanner();
+
+function maybeFireLocalReminder(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const practiceLabel = findPracticeInfoForTomorrow();
+  if(!practiceLabel) return;
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('dwccim-reminder-shown') === todayStr) return;
+  new Notification('Practice tomorrow', {
+    body: `${practiceLabel} — Call Time 9:00 AM, Devotion 9:30 AM.`,
+    icon: 'icon-192.png'
+  });
+  localStorage.setItem('dwccim-reminder-shown', todayStr);
+}
+
+function refreshReminderButton(){
+  const enabled = ('Notification' in window) && Notification.permission === 'granted';
+  reminderToggleBtn.classList.toggle('on', enabled);
+  reminderToggleBtn.textContent = enabled ? '🔔 Reminders Enabled' : '🔔 Enable Practice Reminders';
+}
+refreshReminderButton();
+
+reminderToggleBtn.addEventListener('click', async ()=>{
+  if(!('Notification' in window)){
+    reminderToggleBtn.textContent = 'Notifications not supported here';
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    maybeFireLocalReminder();
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  refreshReminderButton();
+  if(perm === 'granted') maybeFireLocalReminder();
+});
+
+maybeFireLocalReminder();
 
 /* ---------- PWA install support ---------- */
 if ('serviceWorker' in navigator) {
