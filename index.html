@@ -536,6 +536,26 @@
     color: var(--text-dim);
     vertical-align: super;
   }
+  .tuner-check{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--text-dim);
+    opacity: 0;
+    transform: scale(.6);
+    transition: opacity .15s, transform .15s, background .15s;
+  }
+  .tuner-check.show{ opacity: 1; transform: scale(1); }
+  .tuner-check.in-tune{ background: var(--praise); }
+  .tuner-check.off{ background: var(--tithes); }
   .tuner-freq{
     text-align:center;
     color: var(--text-dim);
@@ -1165,6 +1185,7 @@
       <div class="string-row" id="stringRow"></div>
       <div class="tuner-note-display">
         <span class="tuner-note" id="tunerNote">—</span><span class="tuner-octave" id="tunerOctave"></span>
+        <span class="tuner-check" id="tunerCheck">✓</span>
       </div>
       <p class="tuner-freq" id="tunerFreq">Tap a string to hear it, or start the mic to tune live</p>
       <div class="tuner-meter">
@@ -1951,6 +1972,7 @@ const tunerNoteEl = document.getElementById('tunerNote');
 const tunerOctaveEl = document.getElementById('tunerOctave');
 const tunerFreqEl = document.getElementById('tunerFreq');
 const tunerNeedleEl = document.getElementById('tunerNeedle');
+const tunerCheckEl = document.getElementById('tunerCheck');
 const tunerStatusEl = document.getElementById('tunerStatus');
 const micToggleBtn = document.getElementById('micToggle');
 const stringRowEl = document.getElementById('stringRow');
@@ -2079,6 +2101,8 @@ function updateTunerDisplay(freq){
     tunerNeedleEl.className = 'tuner-needle';
     tunerStatusEl.textContent = '';
     tunerStatusEl.className = 'tuner-status';
+    tunerCheckEl.className = 'tuner-check';
+    tunerCheckEl.textContent = '\u2713';
     stringRowEl.querySelectorAll('.string-btn').forEach(b=>b.classList.remove('match'));
     return;
   }
@@ -2097,6 +2121,10 @@ function updateTunerDisplay(freq){
   tunerNeedleEl.className = 'tuner-needle ' + stateClass;
   tunerStatusEl.textContent = stateLabel + (stateClass !== 'in-tune' ? ' (' + (cents>0?'+':'') + cents + '\u00A2)' : '');
   tunerStatusEl.className = 'tuner-status ' + stateClass;
+
+  const isInTune = stateClass === 'in-tune';
+  tunerCheckEl.textContent = isInTune ? '\u2713' : '\u2717';
+  tunerCheckEl.className = 'tuner-check show ' + (isInTune ? 'in-tune' : 'off');
 
   stringRowEl.querySelectorAll('.string-btn').forEach(b=>{
     const sFreq = parseFloat(b.dataset.freq);
