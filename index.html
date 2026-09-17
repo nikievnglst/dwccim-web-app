@@ -1572,10 +1572,17 @@ const builderClearBtn = document.getElementById('builderClearBtn');
 
 let builderDraft = [];
 
+/* Builds the lineup builder's song dropdown from the MERGED song list
+   (built-in keysData + any songs the team added in the Keys tab), so a
+   song added under Keys is immediately pickable here. Re-run this after
+   a song is added locally or arrives from another device via Firebase. */
 function populateBuilderSongSelect(){
+  const previous = builderSongSelect.value;
   builderSongSelect.innerHTML = '';
   Object.entries(keysData).forEach(([lang, cats])=>{
-    Object.entries(cats).forEach(([cat, list])=>{
+    Object.keys(cats).forEach((cat)=>{
+      const list = getMergedSongList(lang, cat);
+      if(list.length === 0) return;
       const og = document.createElement('optgroup');
       og.label = lang + ' \u2014 ' + catLabels[cat][lang];
       list.forEach(([name])=>{
@@ -1587,6 +1594,7 @@ function populateBuilderSongSelect(){
       builderSongSelect.appendChild(og);
     });
   });
+  if(previous){ builderSongSelect.value = previous; }
 }
 populateBuilderSongSelect();
 
@@ -1936,9 +1944,12 @@ addSongSaveBtn.addEventListener('click', ()=>{
   songSelect.value = title;
   renderResult(title);
 
+  // Make the new song immediately available in the Schedule tab's lineup builder.
+  populateBuilderSongSelect();
+
   addSongConfirmEl.style.display = 'block';
   addSongConfirmEl.style.color = 'var(--praise)';
-  addSongConfirmEl.textContent = `\u2713 "${title}" added \u2014 ${leader}: ${key}`;
+  addSongConfirmEl.textContent = `\u2713 "${title}" added \u2014 ${leader}: ${key} \u00b7 now available in the lineup builder`;
   addSongTitleEl.value = '';
   addSongKeyEl.value = '';
 });
@@ -1950,6 +1961,7 @@ if(fbEnabled){
     const remote = snap.val() || {};
     saveCustomSongsLocal(remote);
     renderSongOptions();
+    populateBuilderSongSelect();
   }, (err)=>{
     console.warn('Lost connection to the team database:', err);
     addSongSyncNoteEl.textContent = '\u26A0\uFE0F Couldn\u2019t reach the team database \u2014 new songs are saved on this device only for now.';
