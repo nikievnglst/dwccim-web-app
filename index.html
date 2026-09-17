@@ -1122,6 +1122,34 @@
       </div>
       <a class="chord-search-link" id="chordSearchLink" target="_blank" rel="noopener">🔍 Search for chords/lyrics online</a>
     </div>
+
+    <button class="setlist-toggle-btn" id="addSongToggleBtn">➕ Add Song</button>
+    <div class="builder-card" id="addSongCard">
+      <label class="field-label" for="addSongLang">Language</label>
+      <select id="addSongLang">
+        <option value="English">English</option>
+        <option value="Tagalog">Tagalog</option>
+      </select>
+      <label class="field-label" for="addSongCat">Section</label>
+      <select id="addSongCat">
+        <option value="worship">Worship Songs</option>
+        <option value="praise">Praise Songs</option>
+        <option value="tithes">Tithes and Offering</option>
+      </select>
+      <label class="field-label" for="addSongTitle">Song Title</label>
+      <input type="text" id="addSongTitle" placeholder="e.g. Amazing Grace" style="width:100%; padding:14px 16px; border-radius:12px; border:1px solid var(--hairline); background:var(--surface); color:var(--text); font-size:15px; font-family:inherit; margin-bottom:14px; box-sizing:border-box;">
+      <label class="field-label" for="addSongLeader">Worship Leader</label>
+      <select id="addSongLeader">
+        <option value="Ming">Ming</option>
+        <option value="Jove">Jove</option>
+        <option value="Lorraine">Lorraine</option>
+      </select>
+      <label class="field-label" for="addSongKey">Key</label>
+      <input type="text" id="addSongKey" placeholder="e.g. G, Bm, C#" style="width:100%; padding:14px 16px; border-radius:12px; border:1px solid var(--hairline); background:var(--surface); color:var(--text); font-size:15px; font-family:inherit; margin-bottom:14px; box-sizing:border-box;">
+      <button class="builder-add-btn" id="addSongSaveBtn">➕ Add Song</button>
+      <p class="team-note" id="addSongSyncNote"></p>
+      <p class="team-note" id="addSongConfirm" style="color: var(--praise); display:none;"></p>
+    </div>
   </section>
 
   <section class="view" id="view-guidelines">
@@ -1389,6 +1417,15 @@ const lineups = {
     { category: "Offertory", title: "We bring", link: null },
     { category: "Victory Song", title: "Praise the Name of the Lord our God", link: null },
   ],
+  "Sept 20": [
+    { category: "Call to Worship", title: "Kami'y Katagpuin", link: null },
+    { category: "Fast Song", title: "Masiglang Umawit (Musikatha)", link: null },
+    { category: "Fast Song", title: "Lahat Sa Akin (Musikatha)", link: null },
+    { category: "Fast Song", title: "Kapahingahan", link: null },
+    { category: "Fast Song", title: "Mga Pangako Mo", link: null },
+    { category: "Offertory", title: "Magbigay", link: null },
+    { category: "Closing", title: "Malayang Malaya (Verse & Chorus Only)", link: null },
+  ],
 };
 
 /* Custom (leader-built) lineups. Cached locally so the app renders instantly,
@@ -1630,6 +1667,60 @@ if(fbEnabled){
 let currentLang = 'English';
 let currentCat = 'worship';
 
+/* Custom (team-added) songs. Same pattern as the lineup builder:
+   cached locally so the app renders instantly, and pushed to Firebase
+   (when configured) so every device sees new songs. */
+function loadCustomSongs(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-custom-songs') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveCustomSongsLocal(data){
+  localStorage.setItem('dwccim-custom-songs', JSON.stringify(data));
+}
+function saveCustomSongs(data){
+  saveCustomSongsLocal(data);
+  if(fbEnabled){
+    fbDb.ref('customSongs').set(data).catch(err=>{
+      console.warn('Could not sync song to the team database — saved on this device only for now.', err);
+    });
+  }
+}
+
+/* Merge built-in keysData with any custom songs added by the team.
+   A custom entry with the same name as a built-in song merges its
+   leader/key into that song instead of creating a duplicate. */
+function getMergedSongList(lang, cat){
+  const builtin = keysData[lang][cat];
+  const custom = loadCustomSongs();
+  const customList = (custom[lang] && custom[lang][cat]) || [];
+  const map = new Map();
+  builtin.forEach(([name, leaders]) => map.set(name.toLowerCase(), [name, {...leaders}]));
+  customList.forEach(([name, leaders]) => {
+    const key = name.toLowerCase();
+    if(map.has(key)){
+      const [origName, origLeaders] = map.get(key);
+      map.set(key, [origName, {...origLeaders, ...leaders}]);
+    } else {
+      map.set(key, [name, {...leaders}]);
+    }
+  });
+  return Array.from(map.values()).sort((a,b)=> a[0].localeCompare(b[0]));
+}
+
+function addCustomSong(lang, cat, title, leader, key){
+  const custom = loadCustomSongs();
+  if(!custom[lang]) custom[lang] = {};
+  if(!custom[lang][cat]) custom[lang][cat] = [];
+  const list = custom[lang][cat];
+  const idx = list.findIndex(([name]) => name.toLowerCase() === title.toLowerCase());
+  if(idx >= 0){
+    list[idx][1][leader] = key;
+  } else {
+    list.push([title, {[leader]: key}]);
+  }
+  saveCustomSongs(custom);
+}
+
 const catPillsEl = document.getElementById('catPills');
 function renderPills(){
   catPillsEl.innerHTML = '';
@@ -1650,7 +1741,7 @@ function renderPills(){
 const songSelect = document.getElementById('songSelect');
 function renderSongOptions(){
   songSelect.innerHTML = '<option value="">Select a song…</option>';
-  const list = keysData[currentLang][currentCat];
+  const list = getMergedSongList(currentLang, currentCat);
   list.forEach(([name])=>{
     const opt = document.createElement('option');
     opt.value = name;
@@ -1667,7 +1758,7 @@ function renderResult(songName){
     renderChordCard('');
     return;
   }
-  const list = keysData[currentLang][currentCat];
+  const list = getMergedSongList(currentLang, currentCat);
   const entry = list.find(([name])=> name === songName);
   if(!entry){
     card.innerHTML = '<p class="empty-state">Song not found.</p>';
@@ -1753,6 +1844,76 @@ document.querySelectorAll('.langbtn').forEach(btn=>{
 });
 
 songSelect.addEventListener('change', ()=> renderResult(songSelect.value));
+
+/* ---------- KEYS VIEW: add song ---------- */
+const addSongToggleBtn = document.getElementById('addSongToggleBtn');
+const addSongCardEl = document.getElementById('addSongCard');
+const addSongLangEl = document.getElementById('addSongLang');
+const addSongCatEl = document.getElementById('addSongCat');
+const addSongTitleEl = document.getElementById('addSongTitle');
+const addSongLeaderEl = document.getElementById('addSongLeader');
+const addSongKeyEl = document.getElementById('addSongKey');
+const addSongSaveBtn = document.getElementById('addSongSaveBtn');
+const addSongSyncNoteEl = document.getElementById('addSongSyncNote');
+const addSongConfirmEl = document.getElementById('addSongConfirm');
+
+addSongToggleBtn.addEventListener('click', ()=>{
+  const isOpen = addSongCardEl.classList.toggle('open');
+  addSongToggleBtn.textContent = isOpen ? '\u25B2 Close' : '\u2795 Add Song';
+  if(isOpen){
+    addSongLangEl.value = currentLang;
+    addSongCatEl.value = currentCat;
+    addSongConfirmEl.style.display = 'none';
+  }
+});
+
+addSongSaveBtn.addEventListener('click', ()=>{
+  const lang = addSongLangEl.value;
+  const cat = addSongCatEl.value;
+  const title = addSongTitleEl.value.trim();
+  const leader = addSongLeaderEl.value;
+  const key = addSongKeyEl.value.trim();
+
+  if(!title || !key){
+    addSongConfirmEl.style.display = 'block';
+    addSongConfirmEl.style.color = 'var(--tithes)';
+    addSongConfirmEl.textContent = 'Please enter both a song title and a key.';
+    return;
+  }
+
+  addCustomSong(lang, cat, title, leader, key);
+
+  document.querySelectorAll('.langbtn').forEach(b=>{
+    if(b.dataset.lang){ b.classList.toggle('active', b.dataset.lang === lang); }
+  });
+  currentLang = lang;
+  currentCat = cat;
+  renderPills();
+  renderSongOptions();
+  songSelect.value = title;
+  renderResult(title);
+
+  addSongConfirmEl.style.display = 'block';
+  addSongConfirmEl.style.color = 'var(--praise)';
+  addSongConfirmEl.textContent = `\u2713 "${title}" added \u2014 ${leader}: ${key}`;
+  addSongTitleEl.value = '';
+  addSongKeyEl.value = '';
+});
+
+/* Live sync: reflect songs added from any device. */
+if(fbEnabled){
+  addSongSyncNoteEl.textContent = '\u2601\uFE0F Connected \u2014 songs you add sync to every device automatically.';
+  fbDb.ref('customSongs').on('value', (snap)=>{
+    const remote = snap.val() || {};
+    saveCustomSongsLocal(remote);
+    renderSongOptions();
+  }, (err)=>{
+    console.warn('Lost connection to the team database:', err);
+    addSongSyncNoteEl.textContent = '\u26A0\uFE0F Couldn\u2019t reach the team database \u2014 new songs are saved on this device only for now.';
+  });
+} else {
+  addSongSyncNoteEl.textContent = 'Songs you add are stored on this device only (there\u2019s no shared server), so let the team know what you added, or add it on the phone/computer the team screen uses.';
+}
 
 renderPills();
 renderSongOptions();
