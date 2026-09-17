@@ -841,7 +841,9 @@
     font-size: 13.5px;
     line-height: 1.6;
     white-space: pre-wrap;
-    resize: vertical;
+    resize: none;
+    overflow-y: hidden;
+    box-sizing: border-box;
   }
   .chord-textarea[disabled]{
     opacity: 0.85;
@@ -913,12 +915,26 @@
     border-top: 1px solid var(--hairline);
   }
   .builder-item{
+    padding: 10px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .builder-item-main{
     display:flex;
     justify-content: space-between;
     align-items:center;
     gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--hairline);
+    margin-bottom: 8px;
+  }
+  .builder-item-link{
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 12.5px;
+    font-family: inherit;
+    box-sizing: border-box;
   }
   .builder-item-info{ min-width: 0; }
   .builder-item-cat{
@@ -1238,13 +1254,13 @@
     <h2 class="section-title">My Availability</h2>
     <div class="avail-card" id="availCard"></div>
     <p class="team-note" id="availEmptyNote"></p>
+    <p class="team-note" id="availSyncNote"></p>
 
     <h2 class="section-title">Practice Reminders</h2>
     <div class="toolbox-card">
       <button class="reminder-btn" id="reminderToggle">🔔 Enable Practice Reminders</button>
-      <p class="team-note">Shows a reminder the evening before practice, when you open the app on this device. This is a local, on-device reminder — it can't wake up a closed app the way a real push notification would.</p>
+      <p class="team-note">Shows a reminder the evening before practice, when you open the app on this device. This is a local, on-device reminder — it can't wake up a closed app the way a real push notification would, and it can't be sent to anyone else's phone from here.</p>
     </div>
-    <p class="team-note">Availability and reminders are saved on this device only — they don't sync automatically across everyone's phones. Use "Copy message" to share your status in the group chat.</p>
   </section>
 </div>
 
@@ -1581,11 +1597,14 @@ function renderBuilderList(){
   }
   builderListEl.innerHTML = builderDraft.map((item, i)=>`
     <div class="builder-item">
-      <div class="builder-item-info">
-        <span class="builder-item-cat">${item.category}</span>
-        <span class="builder-item-song">${item.title}</span>
+      <div class="builder-item-main">
+        <div class="builder-item-info">
+          <span class="builder-item-cat">${item.category}</span>
+          <span class="builder-item-song">${item.title}</span>
+        </div>
+        <button class="builder-remove-btn" data-idx="${i}" title="Remove">\u2715</button>
       </div>
-      <button class="builder-remove-btn" data-idx="${i}" title="Remove">\u2715</button>
+      <input type="url" class="builder-item-link" data-idx="${i}" placeholder="Paste YouTube link (optional)" value="${item.link ? item.link.replace(/"/g,'&quot;') : ''}">
     </div>
   `).join('');
   builderListEl.querySelectorAll('.builder-remove-btn').forEach(btn=>{
@@ -1594,11 +1613,25 @@ function renderBuilderList(){
       renderBuilderList();
     });
   });
+  builderListEl.querySelectorAll('.builder-item-link').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const idx = parseInt(inp.dataset.idx, 10);
+      builderDraft[idx].link = inp.value.trim() || null;
+    });
+  });
 }
 
 function openBuilderForDate(date){
   const custom = loadCustomLineups();
-  builderDraft = custom[date] ? custom[date].map(it=> Object.assign({}, it)) : [];
+  if(custom[date] && custom[date].length){
+    builderDraft = custom[date].map(it=> Object.assign({}, it));
+  } else if(lineups[date] && lineups[date].length){
+    // Start from the built-in lineup so it can be edited (e.g. adding links)
+    // instead of the builder appearing empty for dates that already have one.
+    builderDraft = lineups[date].map(it=> Object.assign({}, it));
+  } else {
+    builderDraft = [];
+  }
   renderBuilderList();
 }
 
@@ -1799,6 +1832,14 @@ const chordCancelBtn = document.getElementById('chordCancel');
 const chordSearchLinkEl = document.getElementById('chordSearchLink');
 let chordCurrentSong = '';
 
+/* Grows the textarea to fit all of its content, so the whole chord chart
+   is visible on the page (page scrolls) instead of inside a tiny scrollbox. */
+function autoGrowTextarea(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+chordTextEl.addEventListener('input', ()=> autoGrowTextarea(chordTextEl));
+
 function renderChordCard(songName){
   chordCurrentSong = songName;
   if(!songName){
@@ -1813,12 +1854,14 @@ function renderChordCard(songName){
   chordActionsEl.style.display = 'none';
   chordEditToggleBtn.style.display = 'flex';
   chordSearchLinkEl.href = 'https://www.google.com/search?q=' + encodeURIComponent(songName + ' chords lyrics');
+  autoGrowTextarea(chordTextEl);
 }
 
 chordEditToggleBtn.addEventListener('click', ()=>{
   chordTextEl.disabled = false;
   chordTextEl.focus();
   chordActionsEl.style.display = 'flex';
+  autoGrowTextarea(chordTextEl);
 });
 
 chordCancelBtn.addEventListener('click', ()=>{
@@ -2491,8 +2534,16 @@ function loadAvailability(){
   try{ return JSON.parse(localStorage.getItem('dwccim-availability') || '{}'); }
   catch(e){ return {}; }
 }
-function saveAvailability(data){
+function saveAvailabilityLocal(data){
   localStorage.setItem('dwccim-availability', JSON.stringify(data));
+}
+function saveAvailability(data){
+  saveAvailabilityLocal(data);
+  if(fbEnabled){
+    fbDb.ref('availability').set(data).catch(err=>{
+      console.warn('Could not sync availability to the team database — saved on this device only for now.', err);
+    });
+  }
 }
 function availKey(name, date){ return name + '::' + date; }
 
@@ -2597,6 +2648,22 @@ function renderAvailability(){
 }
 
 renderAvailability();
+
+/* Live sync: reflect availability changes made by teammates on other devices. */
+const availSyncNoteEl = document.getElementById('availSyncNote');
+if(fbEnabled){
+  availSyncNoteEl.textContent = '\u2601\uFE0F Connected \u2014 availability syncs with the whole team automatically.';
+  fbDb.ref('availability').on('value', (snap)=>{
+    const remote = snap.val() || {};
+    saveAvailabilityLocal(remote);
+    renderAvailability();
+  }, (err)=>{
+    console.warn('Lost connection to the team database:', err);
+    availSyncNoteEl.textContent = '\u26A0\uFE0F Couldn\u2019t reach the team database \u2014 availability is saved on this device only for now.';
+  });
+} else {
+  availSyncNoteEl.textContent = 'Availability is stored on this device only (there\u2019s no shared server), so use \u201cCopy message\u201d to share your status in the group chat.';
+}
 
 /* ---------- PRACTICE REMINDER (local, on-device) ---------- */
 const reminderBannerEl = document.getElementById('reminderBanner');
