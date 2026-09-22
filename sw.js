@@ -1,10 +1,12 @@
-const CACHE_NAME = "worship-team-v2";
+const CACHE_NAME = "worship-team-v3";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
-  "./logo.png"
+  "./logo.png",
+  "./team-photo-1.jpg",
+  "./team-photo-2.jpg"
 ];
 
 self.addEventListener("install", (event) => {

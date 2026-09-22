@@ -185,6 +185,47 @@
   .pill[data-cat="praise"]{ color: var(--praise); }
   .pill[data-cat="tithes"]{ color: var(--tithes); }
 
+  .song-search{
+    width:100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+  }
+  .song-search::placeholder{ color: var(--text-dim); }
+  .song-search-results{
+    display:none;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    margin: -8px 0 14px;
+  }
+  .song-search-results.show{ display:block; }
+  .song-search-result{
+    padding: 11px 14px;
+    border-top: 1px solid var(--hairline);
+    cursor: pointer;
+    font-size: 13.5px;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+  }
+  .song-search-result:first-child{ border-top: none; }
+  .song-search-result:hover{ background: var(--surface-alt); }
+  .song-search-tag{
+    color: var(--text-dim);
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .langrow{
     display:flex;
     gap: 8px;
@@ -359,12 +400,33 @@
     border-radius: 14px;
     overflow: hidden;
   }
+  .lineup-header{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 14px 18px 0;
+    gap: 10px;
+  }
   .lineup-title{
     font-family:'Fraunces', serif;
     font-size: 16px;
     font-weight: 600;
-    padding: 14px 18px 0;
     margin: 0;
+  }
+  .lineup-share-btn{
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    font-size: 14px;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: inherit;
   }
   .lineup-row{
     display:flex;
@@ -417,6 +479,94 @@
     padding: 20px;
   }
   .toolbox-card + .toolbox-card{ margin-top: 20px; }
+
+  /* about team */
+  .about-gallery{
+    position: relative;
+    margin-bottom: 16px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+  }
+  .about-photo{
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
+  .about-overlay{
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 40px 16px 16px;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0) 100%);
+  }
+  .about-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .about-text{
+    font-size: 14px;
+    line-height: 1.6;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.7);
+  }
+  .about-verse{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    margin: 0 0 18px;
+    padding-left: 12px;
+    border-left: 2px solid var(--gold);
+  }
+  .about-values{
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .about-values-col{ flex: 1; min-width: 130px; }
+  .about-values-label{
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .about-values-col ul{
+    margin: 0;
+    padding-left: 18px;
+  }
+  .about-values-col li{
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .about-subheading{
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 18px 0 6px;
+    color: var(--text);
+  }
+  .about-subheading:first-of-type{ margin-top: 18px; }
+  .about-placeholder{
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+  }
+  .about-placeholder em{
+    font-style: italic;
+    color: var(--text-dim);
+  }
 
   /* metronome */
   .bpm-display{
@@ -709,6 +859,64 @@
   .wrap.fs-0{ zoom: 0.9; }
   .wrap.fs-2{ zoom: 1.15; }
 
+  /* ---------- Team tab: directory ---------- */
+  .team-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .member-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+  }
+  .member-avatar{
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: 'Fraunces', serif;
+    color: #fff;
+    margin: 0 auto 10px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .member-avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display:block;
+  }
+  .member-photo-remove{
+    display:block;
+    margin: 6px auto 0;
+    border: none;
+    background: none;
+    color: var(--tithes);
+    font-size: 10.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+  .member-name{
+    font-weight: 600;
+    font-size: 13.5px;
+    margin-bottom: 4px;
+  }
+  .member-roles{
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
   /* ---------- Team tab: availability + reminders ---------- */
   .whoami-row{
     margin-bottom: 18px;
@@ -790,6 +998,24 @@
     text-align:center;
     padding: 16px 0;
   }
+  .whosout-list{ margin-top: 8px; }
+  .whosout-person{
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .whosout-name{
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--tithes);
+  }
+  .whosout-reason{
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-align: right;
+  }
   .reminder-btn{
     width: 100%;
     padding: 12px 0;
@@ -859,6 +1085,45 @@
     margin-top: 10px;
   }
   .chord-actions button{ flex:1; }
+  .transpose-row{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .transpose-label{
+    font-size: 12.5px;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .transpose-controls{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .transpose-btn{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height: 1;
+  }
+  .transpose-value{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14px;
+    min-width: 26px;
+    text-align:center;
+  }
   .chord-search-link{
     display:block;
     text-align:center;
@@ -892,6 +1157,59 @@
     display:none;
   }
   .builder-card.open{ display:block; }
+  .history-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 6px 18px;
+    margin-top: 14px;
+    display:none;
+  }
+  .history-card.open{ display:block; }
+  .history-entry{
+    padding: 14px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .history-entry:first-child{ border-top: none; }
+  .history-entry-top{
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .history-date{
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .history-ts{
+    font-size: 11.5px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .history-songs{
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .history-restore-btn{
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .history-empty{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    text-align:center;
+    padding: 16px 0;
+  }
   .builder-row{
     display:flex;
     gap: 8px;
@@ -1113,9 +1431,13 @@
       </div>
       <p class="team-note" id="builderSyncNote"></p>
     </div>
+    <button class="setlist-toggle-btn" id="historyToggleBtn">📜 Lineup History</button>
+    <div class="history-card" id="historyCard"></div>
   </section>
 
   <section class="view" id="view-keys">
+    <input type="search" id="songSearchInput" class="song-search" placeholder="🔍 Search all songs…" autocomplete="off">
+    <div class="song-search-results" id="songSearchResults"></div>
     <div class="langrow">
       <button class="langbtn active" data-lang="English">English</button>
       <button class="langbtn" data-lang="Tagalog">Tagalog</button>
@@ -1130,6 +1452,14 @@
       <div class="chord-header">
         <p class="chord-song-name" id="chordSongName"></p>
         <button class="icon-btn" id="chordEditToggle" title="Add / edit chords">✏️</button>
+      </div>
+      <div class="transpose-row" id="transposeRow" style="display:none;">
+        <span class="transpose-label">Transpose</span>
+        <div class="transpose-controls">
+          <button class="transpose-btn" id="transposeDown" title="Down a half-step">−</button>
+          <span class="transpose-value" id="transposeValue">0</span>
+          <button class="transpose-btn" id="transposeUp" title="Up a half-step">+</button>
+        </div>
       </div>
       <textarea id="chordText" class="chord-textarea" disabled placeholder="No chord chart saved for this song yet. Tap ✏️ to paste in your own chords/lyrics so the team can see them here next time."></textarea>
       <div class="chord-actions" id="chordActions" style="display:none;">
@@ -1242,12 +1572,43 @@
   </section>
 
   <section class="view" id="view-team">
+    <h2 class="section-title" style="margin-top:0">About the Worship Team</h2>
+    <div class="about-gallery">
+      <img src="team-photo-1.jpg" alt="Worship team at a Christmas service" class="about-photo" loading="lazy">
+      <div class="about-overlay">
+        <p class="about-text">We're the worship team of <strong>Divine Word Christian Church International Ministry (DWCCIM)</strong> — the worship leaders, musicians, singers, and dancers who serve together to praise and thank the Lord.</p>
+      </div>
+    </div>
+    <div class="about-card">
+      <div class="about-values">
+        <div class="about-values-col">
+          <span class="about-values-label">Core Values</span>
+          <ul>
+            <li>Prayer</li>
+            <li>Unity</li>
+            <li>Love</li>
+            <li>Servanthood</li>
+            <li>Obedience</li>
+          </ul>
+        </div>
+      </div>
+      <h3 class="about-subheading">Mission</h3>
+      <p class="about-placeholder">To strive for excellence by practicing and developing our vocal, instrumental and songwriting abilities, thus ushering people into best worship, giving God the glory due His Name. <em>(Temporary)</em></p>
+      <h3 class="about-subheading">Vision</h3>
+      <p class="about-placeholder">A Ministry that facilitates the fulfilment of the overall mission and vision of this church through the delivery of a Spirit-led music and thus enhances the worship service. <em>(Temporary)</em></p>
+    </div>
+
+    <h2 class="section-title">Team Directory</h2>
+    <div class="team-grid" id="teamGrid"></div>
+    <input type="file" id="memberPhotoInput" accept="image/*" style="display:none;">
+    <p class="team-note">Tap your own picture to add a photo from this device — it only changes what you see here, not anyone else's app.</p>
+
     <label class="field-label" for="whoamiSelect">Who are you?</label>
     <div class="whoami-row">
       <select id="whoamiSelect"></select>
     </div>
 
-    <h2 class="section-title" style="margin-top:0">My Part</h2>
+    <h2 class="section-title">My Part</h2>
     <div class="mypart-card" id="myPartCard"></div>
     <p class="team-note" id="myPartEmptyNote"></p>
 
@@ -1255,6 +1616,10 @@
     <div class="avail-card" id="availCard"></div>
     <p class="team-note" id="availEmptyNote"></p>
     <p class="team-note" id="availSyncNote"></p>
+
+    <h2 class="section-title">Not Available this Saturday</h2>
+    <div class="avail-card" id="whosOutCard"></div>
+    <p class="team-note" id="whosOutEmptyNote"></p>
 
     <h2 class="section-title">Practice Reminders</h2>
     <div class="toolbox-card">
@@ -1482,8 +1847,51 @@ function renderLineup(date){
     </div>
   `).join('');
   const badge = isCustom ? '<span class="custom-lineup-badge">Custom</span>' : '';
-  el.innerHTML = `<div class="lineup-card"><p class="lineup-title">Song Lineup${badge}</p>${rows}</div>`;
+  el.innerHTML = `<div class="lineup-card">
+    <div class="lineup-header">
+      <p class="lineup-title">Song Lineup${badge}</p>
+      <button class="lineup-share-btn" data-date="${date}" title="Share this lineup">📤</button>
+    </div>
+    ${rows}
+  </div>`;
 }
+
+/* Formats a date's lineup as plain text and shares it via the native share
+   sheet (mobile) or copies it to the clipboard (desktop / unsupported). */
+function formatLineupForSharing(date){
+  const custom = loadCustomLineups();
+  const items = (custom[date] && custom[date].length) ? custom[date] : lineups[date];
+  if(!items || items.length === 0) return '';
+  const lines = items.map(it => `${it.category}: ${it.title}${it.link ? ' — ' + it.link : ''}`);
+  return `Song Lineup — ${date}\n` + lines.join('\n');
+}
+document.getElementById('lineupSection').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('.lineup-share-btn');
+  if(!btn) return;
+  const text = formatLineupForSharing(btn.dataset.date);
+  if(!text) return;
+  const original = btn.textContent;
+  try{
+    if(navigator.share){
+      await navigator.share({ text, title: 'Song Lineup — ' + btn.dataset.date });
+      return;
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    btn.textContent = '✓';
+    setTimeout(()=>{ btn.textContent = original; }, 1200);
+  }catch(err){
+    // user cancelled the native share sheet, or clipboard failed — no-op
+  }
+});
 
 const catLabels = {
   worship: {English:"Worship Songs", Tagalog:"Worship Song"},
@@ -1668,6 +2076,7 @@ builderSaveBtn.addEventListener('click', ()=>{
     delete custom[date];
   } else {
     custom[date] = builderDraft.map(it=> Object.assign({}, it));
+    appendLineupHistory(date, builderDraft);
   }
   saveCustomLineups(custom);
   renderLineup(date);
@@ -1675,6 +2084,84 @@ builderSaveBtn.addEventListener('click', ()=>{
   builderSaveBtn.textContent = 'Saved!';
   setTimeout(()=>{ builderSaveBtn.textContent = original; }, 1200);
 });
+
+/* ---------- SCHEDULE VIEW: lineup history ----------
+   A running snapshot of every saved lineup (most recent first, capped at
+   15) so past setlists stay browsable instead of only the current one. */
+function loadLineupHistory(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-lineup-history') || '[]'); }
+  catch(e){ return []; }
+}
+function saveLineupHistoryLocal(data){
+  localStorage.setItem('dwccim-lineup-history', JSON.stringify(data));
+}
+function saveLineupHistory(data){
+  saveLineupHistoryLocal(data);
+  if(fbEnabled){
+    fbDb.ref('lineupHistory').set(data).catch(err=>{
+      console.warn('Could not sync lineup history to the team database — saved on this device only for now.', err);
+    });
+  }
+}
+function appendLineupHistory(date, items){
+  const history = loadLineupHistory();
+  history.unshift({ date, items: items.map(it=> Object.assign({}, it)), ts: Date.now() });
+  saveLineupHistory(history.slice(0, 15));
+}
+
+const historyToggleBtn = document.getElementById('historyToggleBtn');
+const historyCardEl = document.getElementById('historyCard');
+
+function renderHistory(){
+  const history = loadLineupHistory();
+  if(history.length === 0){
+    historyCardEl.innerHTML = '<p class="history-empty">No saved lineups yet — history fills in as the team saves setlists.</p>';
+    return;
+  }
+  historyCardEl.innerHTML = history.map((entry, i)=>{
+    const when = new Date(entry.ts).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+    const songs = entry.items.map(it=> it.title).join(' · ');
+    return `
+      <div class="history-entry">
+        <div class="history-entry-top">
+          <span class="history-date">${entry.date}</span>
+          <span class="history-ts">Saved ${when}</span>
+        </div>
+        <p class="history-songs">${songs}</p>
+        <button class="history-restore-btn" data-idx="${i}">↺ Restore to builder</button>
+      </div>
+    `;
+  }).join('');
+  historyCardEl.querySelectorAll('.history-restore-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const entry = loadLineupHistory()[parseInt(btn.dataset.idx, 10)];
+      if(!entry) return;
+      sundaySelect.value = entry.date;
+      renderSchedule(entry.date);
+      builderDraft = entry.items.map(it=> Object.assign({}, it));
+      builderCardEl.classList.add('open');
+      builderToggleBtn.textContent = '▲ Close Lineup Builder';
+      renderBuilderList();
+      historyCardEl.classList.remove('open');
+      historyToggleBtn.textContent = '📜 Lineup History';
+    });
+  });
+}
+
+historyToggleBtn.addEventListener('click', ()=>{
+  const isOpen = historyCardEl.classList.toggle('open');
+  historyToggleBtn.textContent = isOpen ? '▲ Close History' : '📜 Lineup History';
+  if(isOpen) renderHistory();
+});
+
+if(fbEnabled){
+  fbDb.ref('lineupHistory').on('value', (snap)=>{
+    saveLineupHistoryLocal(snap.val() || []);
+    if(historyCardEl.classList.contains('open')) renderHistory();
+  }, (err)=>{
+    console.warn('Lost connection to the team database (lineup history):', err);
+  });
+}
 
 builderClearBtn.addEventListener('click', ()=>{
   const date = sundaySelect.value;
@@ -1838,7 +2325,54 @@ const chordEditToggleBtn = document.getElementById('chordEditToggle');
 const chordSaveBtn = document.getElementById('chordSave');
 const chordCancelBtn = document.getElementById('chordCancel');
 const chordSearchLinkEl = document.getElementById('chordSearchLink');
+const transposeRowEl = document.getElementById('transposeRow');
+const transposeValueEl = document.getElementById('transposeValue');
+const transposeDownBtn = document.getElementById('transposeDown');
+const transposeUpBtn = document.getElementById('transposeUp');
 let chordCurrentSong = '';
+let chordTransposeSteps = 0;
+
+/* ---------- KEYS VIEW: chord transpose ----------
+   Recognizes a chord only when an ENTIRE whitespace-separated token matches
+   the chord pattern (e.g. "G", "Bm", "C#m7", "D/F#") so ordinary words in
+   pasted lyrics are never mistaken for chords. */
+const NOTE_SHARPS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_FLATS  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const NOTE_INDEX = {};
+NOTE_SHARPS.forEach((n,i)=> NOTE_INDEX[n]=i);
+NOTE_FLATS.forEach((n,i)=> NOTE_INDEX[n]=i);
+function transposeNoteName(note, steps){
+  const idx = NOTE_INDEX[note];
+  if(idx === undefined) return note;
+  const preferFlat = note.includes('b');
+  const newIdx = ((idx + steps) % 12 + 12) % 12;
+  return preferFlat ? NOTE_FLATS[newIdx] : NOTE_SHARPS[newIdx];
+}
+const CHORD_SUFFIXES = ['m7b5','maj9','maj7','min9','min7','add11','add13','add9','sus4','sus2','dim7','maj','min','dim','aug','sus','m11','m13','m9','m7','m6','m','13','11','9','7','6','5','4','2'];
+const CHORD_TOKEN_RE = new RegExp('^([A-G])(#|b)?(' + CHORD_SUFFIXES.join('|') + ')?(\\/([A-G])(#|b)?)?$');
+function transposeToken(tok, steps){
+  const m = tok.match(CHORD_TOKEN_RE);
+  if(!m) return tok;
+  const root = m[1] + (m[2]||'');
+  const suffix = m[3] || '';
+  const bass = m[5] ? (m[5] + (m[6]||'')) : '';
+  const newRoot = transposeNoteName(root, steps);
+  const newBass = bass ? transposeNoteName(bass, steps) : '';
+  return newRoot + suffix + (newBass ? '/' + newBass : '');
+}
+function transposeChordChart(text, steps){
+  if(!steps || !text) return text;
+  return text.split(/(\s+)/).map(tok => (tok.trim()==='' ? tok : transposeToken(tok, steps))).join('');
+}
+function applyTranspose(){
+  const charts = loadChordCharts();
+  const original = charts[chordCurrentSong] || '';
+  chordTextEl.value = transposeChordChart(original, chordTransposeSteps);
+  transposeValueEl.textContent = chordTransposeSteps > 0 ? ('+' + chordTransposeSteps) : String(chordTransposeSteps);
+  autoGrowTextarea(chordTextEl);
+}
+transposeDownBtn.addEventListener('click', ()=>{ chordTransposeSteps--; applyTranspose(); });
+transposeUpBtn.addEventListener('click', ()=>{ chordTransposeSteps++; applyTranspose(); });
 
 /* Grows the textarea to fit all of its content, so the whole chord chart
    is visible on the page (page scrolls) instead of inside a tiny scrollbox. */
@@ -1850,6 +2384,7 @@ chordTextEl.addEventListener('input', ()=> autoGrowTextarea(chordTextEl));
 
 function renderChordCard(songName){
   chordCurrentSong = songName;
+  chordTransposeSteps = 0;
   if(!songName){
     chordCardEl.style.display = 'none';
     return;
@@ -1857,15 +2392,20 @@ function renderChordCard(songName){
   chordCardEl.style.display = 'block';
   chordSongNameEl.textContent = songName;
   const charts = loadChordCharts();
-  chordTextEl.value = charts[songName] || '';
+  const hasChart = !!(charts[songName] && charts[songName].trim());
   chordTextEl.disabled = true;
   chordActionsEl.style.display = 'none';
   chordEditToggleBtn.style.display = 'flex';
   chordSearchLinkEl.href = 'https://www.google.com/search?q=' + encodeURIComponent(songName + ' chords lyrics');
-  autoGrowTextarea(chordTextEl);
+  transposeRowEl.style.display = hasChart ? 'flex' : 'none';
+  applyTranspose();
 }
 
 chordEditToggleBtn.addEventListener('click', ()=>{
+  const charts = loadChordCharts();
+  chordTransposeSteps = 0;
+  transposeRowEl.style.display = 'none';
+  chordTextEl.value = charts[chordCurrentSong] || '';
   chordTextEl.disabled = false;
   chordTextEl.focus();
   chordActionsEl.style.display = 'flex';
@@ -1882,6 +2422,51 @@ chordSaveBtn.addEventListener('click', ()=>{
   if(text){ charts[chordCurrentSong] = text; } else { delete charts[chordCurrentSong]; }
   saveChordCharts(charts);
   renderChordCard(chordCurrentSong);
+});
+
+/* ---------- KEYS VIEW: search across every song, language & category ---------- */
+const songSearchInput = document.getElementById('songSearchInput');
+const songSearchResultsEl = document.getElementById('songSearchResults');
+songSearchInput.addEventListener('input', ()=>{
+  const q = songSearchInput.value.trim().toLowerCase();
+  if(!q){
+    songSearchResultsEl.classList.remove('show');
+    songSearchResultsEl.innerHTML = '';
+    return;
+  }
+  const matches = [];
+  Object.keys(keysData).forEach(lang=>{
+    Object.keys(keysData[lang]).forEach(cat=>{
+      getMergedSongList(lang, cat).forEach(([name])=>{
+        if(name.toLowerCase().includes(q)) matches.push({name, lang, cat});
+      });
+    });
+  });
+  if(matches.length === 0){
+    songSearchResultsEl.innerHTML = '<div class="song-search-result" style="cursor:default;color:var(--text-dim);">No songs match.</div>';
+  } else {
+    songSearchResultsEl.innerHTML = matches.slice(0, 20).map(m => `
+      <div class="song-search-result" data-name="${m.name.replace(/"/g,'&quot;')}" data-lang="${m.lang}" data-cat="${m.cat}">
+        <span>${m.name}</span><span class="song-search-tag">${catLabels[m.cat][m.lang]}</span>
+      </div>
+    `).join('');
+  }
+  songSearchResultsEl.classList.add('show');
+});
+songSearchResultsEl.addEventListener('click', (e)=>{
+  const row = e.target.closest('.song-search-result[data-name]');
+  if(!row) return;
+  const { lang, cat, name } = row.dataset;
+  currentLang = lang;
+  currentCat = cat;
+  document.querySelectorAll('.langbtn').forEach(b=> b.classList.toggle('active', b.dataset.lang === lang));
+  renderPills();
+  renderSongOptions();
+  songSelect.value = name;
+  renderResult(name);
+  songSearchInput.value = '';
+  songSearchResultsEl.classList.remove('show');
+  songSearchResultsEl.innerHTML = '';
 });
 
 document.querySelectorAll('.langbtn').forEach(btn=>{
@@ -2474,8 +3059,12 @@ function canonicalName(raw){
 }
 
 /* ---------- TEAM: derive member names from the schedule ---------- */
+// People on the team who aren't yet assigned a role in the schedule
+// (so they wouldn't otherwise show up here) go in this list.
+const EXTRA_TEAM_MEMBERS = ["Vivian"];
+
 function deriveTeamNames(){
-  const names = new Set();
+  const names = new Set(EXTRA_TEAM_MEMBERS);
   Object.values(schedule.roles).forEach(byDate=>{
     Object.values(byDate).forEach(cell=>{
       cell.split(/\/|&/).forEach(part=>{
@@ -2487,6 +3076,140 @@ function deriveTeamNames(){
   return Array.from(names).sort();
 }
 const teamNames = deriveTeamNames();
+
+/* ---------- TEAM: directory (auto-built from the schedule, no extra data entry) ---------- */
+const AVATAR_COLORS = ['#2B80B9','#E8C547','#8FCA9E','#E85567','#9B7FD4','#4CAF9E'];
+function colorForName(name){
+  let h = 0;
+  for(let i=0;i<name.length;i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+function initialsForName(name){
+  const parts = name.split(/\s+/).filter(Boolean);
+  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+/* Roles for members who aren't (yet) in the weekly rotation, so they still
+   show something meaningful in the Team Directory besides "Team member". */
+const EXTRA_MEMBER_ROLES = {
+  "Vivian": ["Back Up Singer"],
+};
+function deriveMemberRoles(){
+  const map = new Map();
+  Object.keys(schedule.roles).forEach(role=>{
+    Object.values(schedule.roles[role]).forEach(cell=>{
+      cell.split(/\/|&/).forEach(part=>{
+        const n = canonicalName(part.trim());
+        if(!n) return;
+        if(!map.has(n)) map.set(n, new Set());
+        map.get(n).add(role);
+      });
+    });
+  });
+  EXTRA_TEAM_MEMBERS.forEach(n=>{ if(!map.has(n)) map.set(n, new Set()); });
+  Object.entries(EXTRA_MEMBER_ROLES).forEach(([n, roles])=>{
+    if(!map.has(n)) map.set(n, new Set());
+    roles.forEach(r=> map.get(n).add(r));
+  });
+  return map;
+}
+
+/* ---------- TEAM: per-device profile photos ----------
+   Anyone can tap their own card to add a photo from their own phone/computer.
+   Stored only on that device (localStorage), same as the chord charts — a
+   photo added on one phone doesn't appear on anyone else's. */
+function loadMemberPhotos(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-member-photos') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveMemberPhotos(data){
+  localStorage.setItem('dwccim-member-photos', JSON.stringify(data));
+}
+// Shrinks the chosen image before storing it, so a full-resolution phone
+// photo doesn't blow past localStorage's size limit.
+function resizeImageFile(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const size = 200;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+const memberPhotoInput = document.getElementById('memberPhotoInput');
+let memberPhotoTarget = '';
+memberPhotoInput.addEventListener('change', async ()=>{
+  const file = memberPhotoInput.files[0];
+  memberPhotoInput.value = '';
+  if(!file || !memberPhotoTarget) return;
+  try{
+    const dataUrl = await resizeImageFile(file);
+    const photos = loadMemberPhotos();
+    photos[memberPhotoTarget] = dataUrl;
+    saveMemberPhotos(photos);
+    renderTeamDirectory();
+  }catch(e){
+    console.warn('Could not save that photo:', e);
+  }
+});
+function removeMemberPhoto(name){
+  const photos = loadMemberPhotos();
+  delete photos[name];
+  saveMemberPhotos(photos);
+  renderTeamDirectory();
+}
+
+function renderTeamDirectory(){
+  const grid = document.getElementById('teamGrid');
+  const memberRoles = deriveMemberRoles();
+  const photos = loadMemberPhotos();
+  const names = Array.from(memberRoles.keys()).sort();
+  grid.innerHTML = names.map(name=>{
+    const roles = Array.from(memberRoles.get(name)).sort();
+    const roleText = roles.length ? roles.join(', ') : 'Team member';
+    const photo = photos[name];
+    const avatarInner = photo
+      ? `<img src="${photo}" alt="${name}">`
+      : initialsForName(name);
+    const avatarStyle = photo ? '' : `style="background:${colorForName(name)}"`;
+    return `
+      <div class="member-card">
+        <div class="member-avatar" ${avatarStyle} data-name="${name.replace(/"/g,'&quot;')}" title="Tap to ${photo ? 'change' : 'add'} your photo">${avatarInner}</div>
+        <div class="member-name">${name}</div>
+        <div class="member-roles">${roleText}</div>
+        ${photo ? `<button class="member-photo-remove" data-name="${name.replace(/"/g,'&quot;')}">Remove photo</button>` : ''}
+      </div>
+    `;
+  }).join('');
+  grid.querySelectorAll('.member-avatar').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      memberPhotoTarget = el.dataset.name;
+      memberPhotoInput.click();
+    });
+  });
+  grid.querySelectorAll('.member-photo-remove').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      removeMemberPhoto(btn.dataset.name);
+    });
+  });
+}
+renderTeamDirectory();
 
 const whoamiSelect = document.getElementById('whoamiSelect');
 whoamiSelect.innerHTML = '<option value="">Select your name…</option>' +
@@ -2575,6 +3298,7 @@ function renderAvailability(){
   availCardEl.innerHTML = '';
   if(!name){
     availEmptyNoteEl.textContent = 'Pick your name above to mark Saturdays you can\u2019t make it to.';
+    renderWhosOut();
     return;
   }
   availEmptyNoteEl.textContent = '';
@@ -2582,6 +3306,7 @@ function renderAvailability(){
   const dates = upcomingDates();
   if(dates.length === 0){
     availCardEl.innerHTML = '<p class="team-empty">No upcoming Saturdays on the calendar.</p>';
+    renderWhosOut();
     return;
   }
   dates.forEach(date=>{
@@ -2657,6 +3382,48 @@ function renderAvailability(){
 
     availCardEl.appendChild(row);
   });
+  renderWhosOut();
+}
+
+const whosOutCardEl = document.getElementById('whosOutCard');
+const whosOutEmptyNoteEl = document.getElementById('whosOutEmptyNote');
+
+function renderWhosOut(){
+  const data = loadAvailability();
+  const dates = upcomingDates();
+  whosOutCardEl.innerHTML = '';
+  if(dates.length === 0){
+    whosOutEmptyNoteEl.textContent = 'No upcoming Saturdays on the calendar.';
+    return;
+  }
+  let anyOut = false;
+  dates.forEach(date=>{
+    const outNames = teamNames.filter(n=>{
+      const entry = data[availKey(n, date)];
+      return entry && entry.unavailable;
+    });
+    if(outNames.length === 0) return;
+    anyOut = true;
+
+    const row = document.createElement('div');
+    row.className = 'avail-row';
+    const top = document.createElement('div');
+    top.className = 'avail-top';
+    top.innerHTML = `<span class="avail-date">${date}</span>`;
+    row.appendChild(top);
+
+    const list = document.createElement('div');
+    list.className = 'whosout-list';
+    list.innerHTML = outNames.map(n=>{
+      const entry = data[availKey(n, date)];
+      const reason = entry.reason ? entry.reason : '';
+      return `<div class="whosout-person"><span class="whosout-name">${n}</span><span class="whosout-reason">${reason}</span></div>`;
+    }).join('');
+    row.appendChild(list);
+
+    whosOutCardEl.appendChild(row);
+  });
+  whosOutEmptyNoteEl.textContent = anyOut ? '' : 'Everyone\u2019s available for all upcoming Saturdays \u2014 nice.';
 }
 
 renderAvailability();
@@ -2685,8 +3452,16 @@ function findPracticeInfoForTomorrow(){
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().slice(0,10);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   for(const label of schedule.dates){
-    if(sundayDateMap[label] === tomorrowStr) return label;
+    const sundayISO = sundayDateMap[label];
+    if(!sundayISO) continue;
+    // Practice happens the Saturday BEFORE this Sunday's service, not on the Sunday itself.
+    const sat = new Date(sundayISO + "T12:00:00");
+    sat.setDate(sat.getDate() - 1);
+    if(sat.toISOString().slice(0,10) === tomorrowStr){
+      return months[sat.getMonth()] + ' ' + sat.getDate();
+    }
   }
   return null;
 }
