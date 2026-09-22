@@ -1601,7 +1601,7 @@
     <h2 class="section-title">Team Directory</h2>
     <div class="team-grid" id="teamGrid"></div>
     <input type="file" id="memberPhotoInput" accept="image/*" style="display:none;">
-    <p class="team-note">Tap your own picture to add a photo from this device — it only changes what you see here, not anyone else's app.</p>
+    <p class="team-note" id="teamPhotoNote">Tap your own picture to add a photo — it syncs so the whole team sees it too.</p>
 
     <label class="field-label" for="whoamiSelect">Who are you?</label>
     <div class="whoami-row">
@@ -1949,6 +1949,17 @@ const sundayDateMap = {
   "Nov 1":"2026-11-01","Nov 8":"2026-11-08","Nov 15":"2026-11-15","Nov 22":"2026-11-22","Nov 29":"2026-11-29",
   "Dec 6":"2026-12-06","Dec 13":"2026-12-13","Dec 20":"2026-12-20","Dec 27":"2026-12-27"
 };
+
+// Practice happens the Saturday BEFORE the listed Sunday service date.
+// The Team tab shows practice dates, so labels must be converted to that Saturday.
+const PRACTICE_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function saturdayLabelFor(sundayLabel){
+  const sundayISO = sundayDateMap[sundayLabel];
+  if(!sundayISO) return sundayLabel;
+  const sat = new Date(sundayISO + "T12:00:00");
+  sat.setDate(sat.getDate() - 1);
+  return PRACTICE_MONTHS[sat.getMonth()] + ' ' + sat.getDate();
+}
 
 // default to nearest upcoming Sunday in the list; fallback to first
 function pickDefaultDate(){
@@ -3114,16 +3125,25 @@ function deriveMemberRoles(){
   return map;
 }
 
-/* ---------- TEAM: per-device profile photos ----------
+/* ---------- TEAM: profile photos (synced across devices) ----------
    Anyone can tap their own card to add a photo from their own phone/computer.
-   Stored only on that device (localStorage), same as the chord charts — a
-   photo added on one phone doesn't appear on anyone else's. */
+   It's cached locally so the app renders instantly, and pushed to Firebase
+   (when configured) so everyone else's app picks it up too — same pattern
+   as availability. */
 function loadMemberPhotos(){
   try{ return JSON.parse(localStorage.getItem('dwccim-member-photos') || '{}'); }
   catch(e){ return {}; }
 }
-function saveMemberPhotos(data){
+function saveMemberPhotosLocal(data){
   localStorage.setItem('dwccim-member-photos', JSON.stringify(data));
+}
+function saveMemberPhotos(data){
+  saveMemberPhotosLocal(data);
+  if(fbEnabled){
+    fbDb.ref('memberPhotos').set(data).catch(err=>{
+      console.warn('Could not sync that photo to the team database — saved on this device only for now.', err);
+    });
+  }
 }
 // Shrinks the chosen image before storing it, so a full-resolution phone
 // photo doesn't blow past localStorage's size limit.
@@ -3210,6 +3230,21 @@ function renderTeamDirectory(){
   });
 }
 renderTeamDirectory();
+
+/* Live sync: reflect photo changes made by teammates on other devices. */
+const teamPhotoNoteEl = document.getElementById('teamPhotoNote');
+if(fbEnabled){
+  fbDb.ref('memberPhotos').on('value', (snap)=>{
+    const remote = snap.val() || {};
+    saveMemberPhotosLocal(remote);
+    renderTeamDirectory();
+  }, (err)=>{
+    console.warn('Lost connection to the team database (photos):', err);
+    teamPhotoNoteEl.textContent = 'Tap your own picture to add a photo — couldn\u2019t reach the team database, so it\u2019s saved on this device only for now.';
+  });
+} else {
+  teamPhotoNoteEl.textContent = 'Tap your own picture to add a photo from this device — it only changes what you see here, not anyone else\u2019s app.';
+}
 
 const whoamiSelect = document.getElementById('whoamiSelect');
 whoamiSelect.innerHTML = '<option value="">Select your name…</option>' +
@@ -3318,7 +3353,7 @@ function renderAvailability(){
 
     const top = document.createElement('div');
     top.className = 'avail-top';
-    top.innerHTML = `<span class="avail-date">${date}</span>`;
+    top.innerHTML = `<span class="avail-date">${saturdayLabelFor(date)}</span>`;
 
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'avail-toggle' + (entry.unavailable ? ' unavailable' : '');
@@ -3354,7 +3389,7 @@ function renderAvailability(){
       copyBtn.className = 'notify-btn';
       copyBtn.textContent = 'Copy message';
       copyBtn.addEventListener('click', async ()=>{
-        const msg = `Hi team, I won't be able to make it to Saturday practice on ${date}.` + (entry.reason ? ` Reason: ${entry.reason}` : '');
+        const msg = `Hi team, I won't be able to make it to Saturday practice on ${saturdayLabelFor(date)}.` + (entry.reason ? ` Reason: ${entry.reason}` : '');
         try{
           if(navigator.clipboard && navigator.clipboard.writeText){
             await navigator.clipboard.writeText(msg);
@@ -3409,7 +3444,7 @@ function renderWhosOut(){
     row.className = 'avail-row';
     const top = document.createElement('div');
     top.className = 'avail-top';
-    top.innerHTML = `<span class="avail-date">${date}</span>`;
+    top.innerHTML = `<span class="avail-date">${saturdayLabelFor(date)}</span>`;
     row.appendChild(top);
 
     const list = document.createElement('div');
