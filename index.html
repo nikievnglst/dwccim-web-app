@@ -3373,11 +3373,19 @@ function renderAvailability(){
       reasonInput.className = 'avail-reason';
       reasonInput.placeholder = 'Reason (optional)';
       reasonInput.value = entry.reason || '';
+      let reasonSaveTimer = null;
       reasonInput.addEventListener('input', ()=>{
         entry.reason = reasonInput.value;
         data[key] = entry;
-        saveAvailability(data);
+        // Save locally right away (instant, no re-render), but wait until
+        // typing pauses before pushing to Firebase — otherwise every
+        // keystroke round-trips through the sync listener below and
+        // rebuilds this input out from under the cursor.
+        saveAvailabilityLocal(data);
+        clearTimeout(reasonSaveTimer);
+        reasonSaveTimer = setTimeout(()=>{ saveAvailability(data); }, 600);
       });
+      reasonInput.addEventListener('blur', ()=> renderAvailability());
       row.appendChild(reasonInput);
 
       const notifyRow = document.createElement('div');
@@ -3470,7 +3478,14 @@ if(fbEnabled){
   fbDb.ref('availability').on('value', (snap)=>{
     const remote = snap.val() || {};
     saveAvailabilityLocal(remote);
-    renderAvailability();
+    // Don't tear down and rebuild the list while someone's mid-keystroke
+    // in a reason field — that's what was causing the scroll-jump bug.
+    // The reasonInput's own 'blur' handler re-renders once they're done.
+    const active = document.activeElement;
+    const isTypingInAvail = active && availCardEl.contains(active);
+    if(!isTypingInAvail){
+      renderAvailability();
+    }
   }, (err)=>{
     console.warn('Lost connection to the team database:', err);
     availSyncNoteEl.textContent = '\u26A0\uFE0F Couldn\u2019t reach the team database \u2014 availability is saved on this device only for now.';
