@@ -1210,6 +1210,53 @@
     text-align:center;
     padding: 16px 0;
   }
+  .rotation-card{
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 6px 18px;
+    margin-top: 14px;
+    display:none;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+  .rotation-card.open{ display:block; }
+  .rotation-row{
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .rotation-row:first-child{ border-top: none; }
+  .rotation-name{
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .rotation-meta{
+    font-size: 12.5px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    text-align: right;
+  }
+  .rotation-row.rotation-never .rotation-meta{
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .rotation-empty{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    text-align:center;
+    padding: 16px 0;
+  }
+  .rotation-inline{
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--hairline);
+  }
   .builder-row{
     display:flex;
     gap: 8px;
@@ -1496,6 +1543,9 @@
       <p class="team-note" id="addSongSyncNote"></p>
       <p class="team-note" id="addSongConfirm" style="color: var(--praise); display:none;"></p>
     </div>
+
+    <button class="setlist-toggle-btn" id="rotationToggleBtn">📊 Song Rotation</button>
+    <div class="rotation-card" id="rotationCard"></div>
   </section>
 
   <section class="view" id="view-guidelines">
@@ -2098,7 +2148,9 @@ builderSaveBtn.addEventListener('click', ()=>{
 
 /* ---------- SCHEDULE VIEW: lineup history ----------
    A running snapshot of every saved lineup (most recent first, capped at
-   15) so past setlists stay browsable instead of only the current one. */
+   60 — about a year of weekly services) so past setlists stay browsable
+   instead of only the current one, and so the Song Rotation view below
+   has enough history to be useful. */
 function loadLineupHistory(){
   try{ return JSON.parse(localStorage.getItem('dwccim-lineup-history') || '[]'); }
   catch(e){ return []; }
@@ -2117,8 +2169,96 @@ function saveLineupHistory(data){
 function appendLineupHistory(date, items){
   const history = loadLineupHistory();
   history.unshift({ date, items: items.map(it=> Object.assign({}, it)), ts: Date.now() });
-  saveLineupHistory(history.slice(0, 15));
+  saveLineupHistory(history.slice(0, 60));
 }
+
+/* ---------- KEYS VIEW: song rotation tracking ----------
+   Reshapes the same lineup history per-song: when each song was last
+   played and how many times it's shown up, so leaders can spot songs
+   that are overdue (or overplayed) at a glance without digging through
+   the raw history list. Songs that exist but have never been saved in
+   a lineup still show up, marked "Never played". */
+function getSongRotationStats(){
+  const history = loadLineupHistory(); // most-recent-first
+  const stats = new Map(); // key: lowercased title -> {title, lastDate, lastTs, count}
+  history.forEach(entry=>{
+    entry.items.forEach(it=>{
+      const key = it.title.toLowerCase();
+      const existing = stats.get(key);
+      if(existing){
+        existing.count += 1;
+      } else {
+        stats.set(key, { title: it.title, lastDate: entry.date, lastTs: entry.ts, count: 1 });
+      }
+    });
+  });
+  Object.entries(keysData).forEach(([lang, cats])=>{
+    Object.keys(cats).forEach(cat=>{
+      getMergedSongList(lang, cat).forEach(([name])=>{
+        const key = name.toLowerCase();
+        if(!stats.has(key)) stats.set(key, { title: name, lastDate: null, lastTs: 0, count: 0 });
+      });
+    });
+  });
+  // Oldest last-played first (never-played songs float to the very top),
+  // most-recently-played last — the order a leader wants when scanning
+  // for what's "due" to come back into rotation.
+  return Array.from(stats.values()).sort((a,b)=> a.lastTs - b.lastTs || a.title.localeCompare(b.title));
+}
+
+/* Small helper for an inline "Last played" line on a single song, used
+   by the Keys tab's song lookup card. */
+function getLastPlayedLabel(songName){
+  const history = loadLineupHistory();
+  const key = songName.toLowerCase();
+  let lastEntry = null, count = 0;
+  history.forEach(entry=>{
+    if(entry.items.some(it=> it.title.toLowerCase() === key)){
+      count += 1;
+      if(!lastEntry) lastEntry = entry;
+    }
+  });
+  if(!lastEntry) return 'Never played (in saved history)';
+  const daysAgo = Math.round((Date.now() - lastEntry.ts) / 86400000);
+  const agoLabel = daysAgo <= 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
+  const timesLabel = count === 1 ? '' : ` \u00b7 played ${count}\u00d7`;
+  return `Last played ${lastEntry.date} (${agoLabel})${timesLabel}`;
+}
+
+const rotationToggleBtn = document.getElementById('rotationToggleBtn');
+const rotationCardEl = document.getElementById('rotationCard');
+
+function renderRotation(){
+  const stats = getSongRotationStats();
+  if(stats.length === 0){
+    rotationCardEl.innerHTML = '<p class="rotation-empty">No songs yet — add some songs above first.</p>';
+    return;
+  }
+  const now = Date.now();
+  rotationCardEl.innerHTML = stats.map(s=>{
+    const never = !s.lastTs;
+    let whenLabel;
+    if(never){
+      whenLabel = 'Never played';
+    } else {
+      const daysAgo = Math.round((now - s.lastTs) / 86400000);
+      whenLabel = `Last: ${s.lastDate} (${daysAgo}d ago)`;
+    }
+    const countLabel = s.count > 0 ? `${s.count}\u00d7 played` : '';
+    return `
+      <div class="rotation-row${never ? ' rotation-never' : ''}">
+        <span class="rotation-name">${s.title}</span>
+        <span class="rotation-meta">${whenLabel}${countLabel ? ' \u00b7 ' + countLabel : ''}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+rotationToggleBtn.addEventListener('click', ()=>{
+  const isOpen = rotationCardEl.classList.toggle('open');
+  rotationToggleBtn.textContent = isOpen ? '\u25B2 Close Song Rotation' : '\uD83D\uDCCA Song Rotation';
+  if(isOpen) renderRotation();
+});
 
 const historyToggleBtn = document.getElementById('historyToggleBtn');
 const historyCardEl = document.getElementById('historyCard');
@@ -2169,6 +2309,7 @@ if(fbEnabled){
   fbDb.ref('lineupHistory').on('value', (snap)=>{
     saveLineupHistoryLocal(snap.val() || []);
     if(historyCardEl.classList.contains('open')) renderHistory();
+    if(rotationCardEl.classList.contains('open')) renderRotation();
   }, (err)=>{
     console.warn('Lost connection to the team database (lineup history):', err);
   });
@@ -2307,10 +2448,10 @@ function renderResult(songName){
   const [, leaders] = entry;
   const names = Object.keys(leaders);
   if(names.length === 0){
-    card.innerHTML = `<p class="song-name">${songName}</p><p class="empty-state">No key recorded.</p>`;
+    card.innerHTML = `<p class="song-name">${songName}</p><p class="empty-state">No key recorded.</p><p class="rotation-inline">${getLastPlayedLabel(songName)}</p>`;
   } else {
     let rows = names.map(n=>`<div class="leader-row"><span class="name">${n}</span><span class="key">${leaders[n]}</span></div>`).join('');
-    card.innerHTML = `<p class="song-name">${songName}</p>${rows}`;
+    card.innerHTML = `<p class="song-name">${songName}</p>${rows}<p class="rotation-inline">${getLastPlayedLabel(songName)}</p>`;
   }
   renderChordCard(songName);
 }
