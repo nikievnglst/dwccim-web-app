@@ -1,4 +1,4 @@
-const CACHE_NAME = "worship-team-v3";
+const CACHE_NAME = "worship-team-v5";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
