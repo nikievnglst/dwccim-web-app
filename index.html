@@ -465,6 +465,39 @@
     text-decoration:none;
   }
   .lineup-link svg{ width: 16px; height: 16px; }
+  .lineup-actions{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .lineup-chords{
+    position: relative;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-alt);
+    border: 1px solid var(--hairline);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+  }
+  .lineup-chords:active{ opacity: 0.7; }
+  .lineup-chords.has-chart::after{
+    content: '';
+    position: absolute;
+    top: 1px; right: 1px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 1.5px solid var(--surface);
+  }
   .lineup-empty{
     padding: 14px 18px 18px;
     color: var(--text-dim);
@@ -1514,6 +1547,7 @@
         <button class="reminder-btn" id="chordSave" style="border-color: var(--praise); color: var(--praise);">Save</button>
       </div>
       <a class="chord-search-link" id="chordSearchLink" target="_blank" rel="noopener">🔍 Search for chords/lyrics online</a>
+      <a class="chord-search-link" id="chordVideoLink" target="_blank" rel="noopener" style="display:none;">▶ Reference video</a>
     </div>
 
     <button class="setlist-toggle-btn" id="addSongToggleBtn">➕ Add Song</button>
@@ -1877,6 +1911,47 @@ function saveCustomLineups(data){
   }
 }
 
+/* Remembered reference-video links, one per song title. Paste a link once in
+   the lineup builder and it shows up every time that song is in a lineup.
+   Same pattern as lineups: cached locally, pushed to Firebase when configured. */
+function songLinkKey(title){
+  // Firebase keys can't contain . # $ [ ] /  — and we want case-insensitive matching.
+  return String(title).trim().toLowerCase().replace(/[.#$\[\]\/]/g, '_');
+}
+function loadSongLinks(){
+  try{ return JSON.parse(localStorage.getItem('dwccim-song-links') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveSongLinksLocal(data){
+  localStorage.setItem('dwccim-song-links', JSON.stringify(data));
+}
+function saveSongLinks(data){
+  saveSongLinksLocal(data);
+  if(fbEnabled){
+    fbDb.ref('songLinks').set(data).catch(err=>{
+      console.warn('Could not sync song links to the team database — saved on this device only for now.', err);
+    });
+  }
+}
+// Links already baked into the built-in lineups also count, so a song that
+// has a link in one week's lineup is findable in any other week.
+function builtinSongLinks(){
+  const out = {};
+  Object.values(lineups).forEach(items => items.forEach(it => {
+    if(it.link && !out[songLinkKey(it.title)]) out[songLinkKey(it.title)] = it.link;
+  }));
+  return out;
+}
+function effectiveSongLink(item, saved, builtin){
+  if(item.link) return item.link;
+  const k = songLinkKey(item.title);
+  return saved[k] || builtin[k] || null;
+}
+function safeHref(url){
+  // Only allow web links, so a pasted "javascript:" URL can never become a clickable link.
+  return /^https?:\/\//i.test(url || '') ? String(url).replace(/"/g, '&quot;') : '';
+}
+
 function renderLineup(date){
   const el = document.getElementById('lineupSection');
   const custom = loadCustomLineups();
@@ -1887,15 +1962,26 @@ function renderLineup(date){
     return;
   }
   const ytIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M21.6 7.2s-.2-1.5-.8-2.2c-.8-.9-1.7-.9-2.1-1C15.9 3.8 12 3.8 12 3.8h0s-3.9 0-6.7.2c-.4 0-1.3.1-2.1 1-.6.7-.8 2.2-.8 2.2S2.2 9 2.2 10.7v1.5C2.2 14 2.4 15.7 2.4 15.7s.2 1.5.8 2.2c.8.9 1.9.9 2.4 1 1.7.2 7.4.2 7.4.2s3.9 0 6.7-.2c.4 0 1.3-.1 2.1-1 .6-.7.8-2.2.8-2.2s.2-1.7.2-3.5v-1.5c0-1.7-.2-3.5-.2-3.5Z" fill="%23FF0000"/><path d="M9.9 14.6V8.9l5.4 2.9-5.4 2.8Z" fill="white"/></svg>';
-  const rows = items.map(item => `
+  const savedLinks = loadSongLinks();
+  const builtinLinks = builtinSongLinks();
+  const charts = loadChordCharts();
+  const rows = items.map(item => {
+    const href = safeHref(effectiveSongLink(item, savedLinks, builtinLinks));
+    const hasChart = !!(charts[item.title] && charts[item.title].trim());
+    const titleAttr = String(item.title).replace(/"/g, '&quot;');
+    return `
     <div class="lineup-row">
       <div class="lineup-info">
         <span class="lineup-cat">${item.category}</span>
         <span class="lineup-song">${item.title}</span>
       </div>
-      ${item.link ? `<a class="lineup-link" href="${item.link}" target="_blank" rel="noopener">${ytIcon}</a>` : ''}
+      <div class="lineup-actions">
+        <button class="lineup-chords${hasChart ? ' has-chart' : ''}" data-title="${titleAttr}" title="${hasChart ? 'Open chords / lyrics' : 'Open chords / lyrics (none saved yet)'}">🎸</button>
+        ${href ? `<a class="lineup-link" href="${href}" target="_blank" rel="noopener" title="Reference video">${ytIcon}</a>` : ''}
+      </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
   const badge = isCustom ? '<span class="custom-lineup-badge">Custom</span>' : '';
   el.innerHTML = `<div class="lineup-card">
     <div class="lineup-header">
@@ -1912,7 +1998,12 @@ function formatLineupForSharing(date){
   const custom = loadCustomLineups();
   const items = (custom[date] && custom[date].length) ? custom[date] : lineups[date];
   if(!items || items.length === 0) return '';
-  const lines = items.map(it => `${it.category}: ${it.title}${it.link ? ' — ' + it.link : ''}`);
+  const savedLinks = loadSongLinks();
+  const builtinLinks = builtinSongLinks();
+  const lines = items.map(it => {
+    const link = effectiveSongLink(it, savedLinks, builtinLinks);
+    return `${it.category}: ${it.title}${link ? ' — ' + link : ''}`;
+  });
   return `Song Lineup — ${date}\n` + lines.join('\n');
 }
 document.getElementById('lineupSection').addEventListener('click', async (e)=>{
@@ -2118,6 +2209,12 @@ builderToggleBtn.addEventListener('click', ()=>{
   if(isOpen) openBuilderForDate(sundaySelect.value);
 });
 
+// Picking a song pre-fills its remembered link (if any), so it never needs re-pasting.
+builderSongSelect.addEventListener('change', ()=>{
+  const k = songLinkKey(builderSongSelect.value);
+  builderLinkInput.value = loadSongLinks()[k] || builtinSongLinks()[k] || '';
+});
+
 builderAddBtn.addEventListener('click', ()=>{
   const title = builderSongSelect.value;
   if(!title) return;
@@ -2138,6 +2235,16 @@ builderSaveBtn.addEventListener('click', ()=>{
   } else {
     custom[date] = builderDraft.map(it=> Object.assign({}, it));
     appendLineupHistory(date, builderDraft);
+    // Remember each song's link for future lineups.
+    const links = loadSongLinks();
+    let linksChanged = false;
+    builderDraft.forEach(it=>{
+      if(it.link && /^https?:\/\//i.test(it.link) && links[songLinkKey(it.title)] !== it.link){
+        links[songLinkKey(it.title)] = it.link;
+        linksChanged = true;
+      }
+    });
+    if(linksChanged) saveSongLinks(links);
   }
   saveCustomLineups(custom);
   renderLineup(date);
@@ -2343,6 +2450,15 @@ if(fbEnabled){
   builderSyncNoteEl.textContent = 'Saved lineups are stored on this device only (there\u2019s no shared server), so whoever builds it should share it in the group chat, or build it on the phone/computer the team screen uses.';
 }
 
+if(fbEnabled){
+  fbDb.ref('songLinks').on('value', (snap)=>{
+    saveSongLinksLocal(snap.val() || {});
+    renderLineup(sundaySelect.value);
+  }, (err)=>{
+    console.warn('Could not sync song links from the team database.', err);
+  });
+}
+
 /* ---------- KEYS VIEW ---------- */
 let currentLang = 'English';
 let currentCat = 'worship';
@@ -2459,8 +2575,9 @@ function renderResult(songName){
 /* ---------- KEYS VIEW: chords/lyrics panel ----------
    No lyrics/chords ship with the app (copyrighted worship-song lyrics
    can't be pre-loaded here). Instead each song has an empty slot that
-   any team member can fill in with their own chart — saved on this
-   device via localStorage, keyed by song name. */
+   any team member can fill in with their own chart — cached on this
+   device via localStorage (keyed by song name) and, when Firebase is
+   configured, synced to every device in the 'chordCharts' node. */
 function loadChordCharts(){
   try{ return JSON.parse(localStorage.getItem('dwccim-chordcharts') || '{}'); }
   catch(e){ return {}; }
@@ -2477,6 +2594,7 @@ const chordEditToggleBtn = document.getElementById('chordEditToggle');
 const chordSaveBtn = document.getElementById('chordSave');
 const chordCancelBtn = document.getElementById('chordCancel');
 const chordSearchLinkEl = document.getElementById('chordSearchLink');
+const chordVideoLinkEl = document.getElementById('chordVideoLink');
 const transposeRowEl = document.getElementById('transposeRow');
 const transposeValueEl = document.getElementById('transposeValue');
 const transposeDownBtn = document.getElementById('transposeDown');
@@ -2549,6 +2667,13 @@ function renderChordCard(songName){
   chordActionsEl.style.display = 'none';
   chordEditToggleBtn.style.display = 'flex';
   chordSearchLinkEl.href = 'https://www.google.com/search?q=' + encodeURIComponent(songName + ' chords lyrics');
+  const videoHref = safeHref(effectiveSongLink({title: songName, link: null}, loadSongLinks(), builtinSongLinks()));
+  if(videoHref){
+    chordVideoLinkEl.href = videoHref;
+    chordVideoLinkEl.style.display = 'block';
+  } else {
+    chordVideoLinkEl.style.display = 'none';
+  }
   transposeRowEl.style.display = hasChart ? 'flex' : 'none';
   applyTranspose();
 }
@@ -2573,8 +2698,59 @@ chordSaveBtn.addEventListener('click', ()=>{
   const text = chordTextEl.value.trim();
   if(text){ charts[chordCurrentSong] = text; } else { delete charts[chordCurrentSong]; }
   saveChordCharts(charts);
+  syncChordChartToCloud(chordCurrentSong, text);
   renderChordCard(chordCurrentSong);
+  renderLineup(sundaySelect.value);
 });
+
+/* ---------- CHORD CHART SYNC (Firebase) ----------
+   Stored one song per entry — chordCharts/<safe-key> = { title, text } — so two
+   people editing different songs never overwrite each other. The local cache
+   stays keyed by the real song title, so charts already saved on a phone keep
+   working exactly as before. */
+function syncChordChartToCloud(title, text){
+  if(!fbEnabled || !title) return;
+  const ref = fbDb.ref('chordCharts/' + songLinkKey(title));
+  const op = text ? ref.set({ title, text }) : ref.remove();
+  op.catch(err=>{
+    console.warn('Could not sync chord chart to the team database — saved on this device only for now.', err);
+  });
+}
+if(fbEnabled){
+  fbDb.ref('chordCharts').on('value', (snap)=>{
+    const remote = snap.val() || {};
+    const rebuilt = {};
+    Object.keys(remote).forEach(k=>{
+      const e = remote[k];
+      if(e && e.title && e.text) rebuilt[e.title] = e.text;
+    });
+    // One-time upgrade: charts that were pasted before syncing existed live only
+    // on this device. Upload any the team database doesn't have yet, instead of
+    // letting the (empty) cloud copy wipe them. Done once per device so that a
+    // chart someone later deletes can't be resurrected by an old phone.
+    if(!localStorage.getItem('dwccim-chords-uploaded')){
+      const local = loadChordCharts();
+      const have = new Set(Object.keys(remote));
+      Object.keys(local).forEach(title=>{
+        const text = local[title];
+        if(text && text.trim() && !have.has(songLinkKey(title))){
+          rebuilt[title] = text;
+          syncChordChartToCloud(title, text);
+        }
+      });
+      localStorage.setItem('dwccim-chords-uploaded', '1');
+    }
+    const before = chordCurrentSong ? (loadChordCharts()[chordCurrentSong] || '') : '';
+    saveChordCharts(rebuilt);
+    // Refresh the open chart only if ITS text changed (so a teammate editing a
+    // different song doesn't reset your transpose), and never while you're typing.
+    const after = chordCurrentSong ? (rebuilt[chordCurrentSong] || '') : '';
+    if(chordCurrentSong && chordTextEl.disabled && before !== after) renderChordCard(chordCurrentSong);
+    renderLineup(sundaySelect.value);
+  }, (err)=>{
+    console.warn('Could not sync chord charts from the team database.', err);
+  });
+}
 
 /* ---------- KEYS VIEW: search across every song, language & category ---------- */
 const songSearchInput = document.getElementById('songSearchInput');
@@ -2619,6 +2795,43 @@ songSearchResultsEl.addEventListener('click', (e)=>{
   songSearchInput.value = '';
   songSearchResultsEl.classList.remove('show');
   songSearchResultsEl.innerHTML = '';
+});
+
+/* Jumps from a lineup row to that song's page in the Keys tab (key, chord
+   chart, transpose). Matches the exact title first, then ignores trailing
+   notes like "(Verse & Chorus Only)". If the song isn't in the Keys list at
+   all, falls back to an online chords/lyrics search. */
+function openSongInKeys(title){
+  const norm = t => String(t).toLowerCase().replace(/\s*\([^)]*\)\s*$/, '').trim();
+  let found = null;
+  for(const pass of ['exact','loose']){
+    for(const lang of Object.keys(keysData)){
+      for(const cat of Object.keys(keysData[lang])){
+        const hit = getMergedSongList(lang, cat).find(([name]) =>
+          pass === 'exact' ? name.toLowerCase() === String(title).toLowerCase() : norm(name) === norm(title));
+        if(hit){ found = {lang, cat, name: hit[0]}; break; }
+      }
+      if(found) break;
+    }
+    if(found) break;
+  }
+  if(!found){
+    window.open('https://www.google.com/search?q=' + encodeURIComponent(title + ' chords lyrics'), '_blank', 'noopener');
+    return;
+  }
+  currentLang = found.lang;
+  currentCat = found.cat;
+  document.querySelectorAll('.langbtn').forEach(b=> b.classList.toggle('active', b.dataset.lang === found.lang));
+  renderPills();
+  renderSongOptions();
+  songSelect.value = found.name;
+  renderResult(found.name);
+  document.querySelector('.tab[data-view="keys"]').click();
+  window.scrollTo(0, 0);
+}
+document.getElementById('lineupSection').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.lineup-chords');
+  if(btn) openSongInKeys(btn.dataset.title);
 });
 
 document.querySelectorAll('.langbtn').forEach(btn=>{
